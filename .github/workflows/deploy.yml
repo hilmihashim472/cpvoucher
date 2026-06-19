@@ -33,6 +33,13 @@ jobs:
           cd frontend
           npm install
           npm run build
+          # Remove old files and copy new build
           sudo rm -rf /var/www/html/*
           sudo cp -r dist/* /var/www/html/
+
+          # Fix permissions so Nginx can read the files
+          sudo chown -R www-data:www-data /var/www/html
+          sudo find /var/www/html -type f -exec chmod 644 {} \;
+          sudo find /var/www/html -type d -exec chmod 755 {} \;
+
           sudo systemctl restart nginx
