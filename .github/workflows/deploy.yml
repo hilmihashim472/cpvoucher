@@ -21,11 +21,13 @@ jobs:
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
           # Clone if not exists, otherwise pull latest
-          if [ ! -d "~/cpvoucher" ]; then
-            git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/hilmihashim472/cpvoucher.git ~/cpvoucher
+          if [ ! -d "$HOME/cpvoucher" ]; then
+            git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/hilmihashim472/cpvoucher.git $HOME/cpvoucher
+            cd $HOME/cpvoucher
+            git checkout deploy-test
+          else
+            cd $HOME/cpvoucher
           fi
-
-          cd ~/cpvoucher
           git fetch --all
           git reset --hard origin/deploy-test
           cd frontend
