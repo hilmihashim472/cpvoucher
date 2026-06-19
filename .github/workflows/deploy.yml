@@ -52,4 +52,9 @@ jobs:
           sudo find /var/www/html -type f -exec chmod 644 {} \;
           sudo find /var/www/html -type d -exec chmod 755 {} \;
 
+          # Fix SPA routing: always serve index.html for non-file routes
+          if ! grep -q "try_files.*\/index\.html" /etc/nginx/sites-enabled/default; then
+            sudo sed -i 's|try_files $uri $uri/ =404;|try_files $uri $uri/ /index.html;|' /etc/nginx/sites-enabled/default
+          fi
+
           sudo systemctl restart nginx
