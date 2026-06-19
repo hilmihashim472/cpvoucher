@@ -22,7 +22,7 @@ jobs:
 
           # Clone if not exists, otherwise pull latest
           if [ ! -d "~/cpvoucher" ]; then
-            git clone https://github.com/hilmihashim472/cpvoucher.git ~/cpvoucher
+            git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/hilmihashim472/cpvoucher.git ~/cpvoucher
           fi
 
           cd ~/cpvoucher
