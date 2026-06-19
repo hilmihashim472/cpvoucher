@@ -73,6 +73,12 @@ jspm_packages/
 # Claude Code session files
 .claude/
 
+# Sensitive credentials - DO NOT COMMIT
+EC2_SSH_KEY
+GH_TOKEN.txt
+VoucherHub-keypairs.ppk
+*.ppk
+
 # OS generated files
 .DS_Store
 .DS_Store?
