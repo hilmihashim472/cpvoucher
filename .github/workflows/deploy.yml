@@ -20,6 +20,10 @@ jobs:
           export NVM_DIR="$HOME/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
+          # Install and use Node.js 22 (Vite 8 requires Node.js 20+)
+          nvm install 22
+          nvm use 22
+
           # Clone if not exists, otherwise pull latest
           if [ ! -d "$HOME/cpvoucher" ]; then
             git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/hilmihashim472/cpvoucher.git $HOME/cpvoucher
