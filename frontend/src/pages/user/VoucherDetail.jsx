@@ -131,9 +131,17 @@ function VoucherDetailContent({ id }) {
             {/* Left column (60%) */}
             <div className="voucher-detail-left">
               <div className="voucher-detail-hero-image">
-                <span className="voucher-detail-hero-brand" aria-hidden="true">
-                  {voucher.brand}
-                </span>
+                {voucher.image ? (
+                  <img
+                    src={voucher.image}
+                    alt={voucher.title}
+                    className="voucher-detail-hero-img"
+                  />
+                ) : (
+                  <span className="voucher-detail-hero-brand" aria-hidden="true">
+                    {voucher.brand}
+                  </span>
+                )}
                 <span className="voucher-detail-hero-badge">
                   Expires in {countdown.days} day{countdown.days === 1 ? "" : "s"}
                 </span>

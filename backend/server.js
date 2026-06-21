@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const fs = require("fs");
 const connectDB = require("./config/db");
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -55,6 +56,8 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/orders", require("./routes/cartRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes")); 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use('/api/admin', adminRoutes);
 
 // ─────────────────────────────────────────────
 // 6. Health Check Endpoint

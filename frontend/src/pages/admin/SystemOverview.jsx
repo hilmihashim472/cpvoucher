@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Bell, Check, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, Check, X, Users, ShoppingBag, Ticket, Star } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -9,7 +9,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { KPI_STATS, PENDING_ORDERS, GROWTH_PROJECTION, RECENT_ACTIVITY } from "./mockData";
+import { useAuth } from "../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 const ACTIVITY_BORDER_STYLES = {
   danger: "system-audit-item-danger",
@@ -18,12 +19,73 @@ const ACTIVITY_BORDER_STYLES = {
   warning: "system-audit-item-warning",
 };
 
-export default function SystemOverview() {
-  const [pendingOrders, setPendingOrders] = useState(PENDING_ORDERS);
+// Mock growth projection (you can make this dynamic later)
+const GROWTH_PROJECTION = [
+  { month: "Jan", value: 4000 },
+  { month: "Feb", value: 3000 },
+  { month: "Mar", value: 5000 },
+  { month: "Apr", value: 4500 },
+  { month: "May", value: 6000 },
+  { month: "Jun", value: 5500 },
+];
 
-  const handleDecision = (id) => {
-    setPendingOrders((items) => items.filter((item) => item.id !== id));
+export default function SystemOverview() {
+  const { api } = useAuth();
+  
+  const [loading, setLoading] = useState(true);
+  const [kpis, setKpis] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    totalOrders: 0,
+    pendingOrders: 0,
+    totalVouchers: 0,
+    activeVouchers: 0,
+    totalPointsRedeemed: 0,
+  });
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await api.get("/admin/stats");
+        setKpis(data.kpis);
+        setPendingOrders(data.pendingOrders);
+        setRecentActivity(data.recentActivity);
+      } catch (error) {
+        toast.error("Failed to load dashboard stats");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [api]);
+
+  const handleDecision = async (id) => {
+    try {
+      // You can add backend logic here to approve/reject orders
+      setPendingOrders((items) => items.filter((item) => item.id !== id));
+      toast.success("Order processed");
+    } catch {
+      toast.error("Failed to process order");
+    }
   };
+
+  // Build KPI cards dynamically
+  const kpiStats = [
+    { label: "Total Users", value: kpis.totalUsers, delta: `${kpis.activeUsers} active`, icon: Users },
+    { label: "Total Orders", value: kpis.totalOrders, delta: `${kpis.pendingOrders} pending`, icon: ShoppingBag },
+    { label: "Total Vouchers", value: kpis.totalVouchers, delta: `${kpis.activeVouchers} active`, icon: Ticket },
+    { label: "Points Redeemed", value: kpis.totalPointsRedeemed.toLocaleString(), delta: "All time", icon: Star },
+  ];
+
+  if (loading) {
+    return (
+      <section className="p-6">
+        <p className="text-gray-500">Loading dashboard...</p>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -45,7 +107,7 @@ export default function SystemOverview() {
 
       {/* KPI cards */}
       <div className="system-kpi-grid">
-        {KPI_STATS.map(({ label, value, delta, icon: Icon }) => (
+        {kpiStats.map(({ label, value, delta, icon: Icon }) => (
           <div key={label} className="system-kpi-card">
             <div className="system-kpi-icon">
               <Icon className="h-5 w-5" aria-hidden="true" />
@@ -131,15 +193,18 @@ export default function SystemOverview() {
         <div className="system-card">
           <h2 className="system-card-title">Recent Activity</h2>
           <ul className="system-audit-list">
-            {RECENT_ACTIVITY.map((entry) => (
-              <li key={entry.id} className={`system-audit-item ${ACTIVITY_BORDER_STYLES[entry.tone]}`}>
+            {recentActivity.length === 0 && (
+              <li className="system-merchant-empty">No recent activity.</li>
+            )}
+            {recentActivity.map((entry) => (
+              <li key={entry.id} className={`system-audit-item ${ACTIVITY_BORDER_STYLES[entry.status] || "system-audit-item-primary"}`}>
                 <div className="system-audit-header">
-                  <p className="system-audit-title">{entry.title}</p>
+                  <p className="system-audit-title">{entry.user} purchased {entry.voucher}</p>
                   <span className="system-audit-time">{entry.time}</span>
                 </div>
-                <p className="system-audit-body">{entry.body}</p>
+                <p className="system-audit-body">{entry.points} points redeemed</p>
                 <div className="system-audit-footer">
-                  <span className="system-audit-type">{entry.type}</span>
+                  <span className="system-audit-type">Order</span>
                 </div>
               </li>
             ))}

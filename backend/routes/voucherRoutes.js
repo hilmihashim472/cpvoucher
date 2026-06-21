@@ -1,25 +1,10 @@
-//routes/voucherRoutes.js
+const router = require("express").Router();
+const voucherController = require("../controllers/voucherController");
+const auth = require("../middleware/auth");
 
-const router = require('express').Router();
-const c = require('../controllers/voucherController');
-const auth = require('../middleware/auth');
-
-const { getCategoryCounts } = c;
-
-const adminOnly = (req, res, next) => {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ message: "Admin access required" });
-  }
-
-  next();
-};
-
-
-router.get("/category-counts", getCategoryCounts);
-router.post('/', auth, adminOnly, c.createVoucher);
-router.get('/', c.getVouchers);
-router.get('/:id', c.getVoucherById);
-router.put('/:id', auth, adminOnly, c.updateVoucher);
-router.delete('/:id', auth, adminOnly, c.deleteVoucher);
+// Public routes (for users)
+router.get("/", voucherController.getVouchersForUsers);
+router.get("/category-counts", voucherController.getCategoryCounts);
+router.get("/:id", voucherController.getVoucherById);
 
 module.exports = router;

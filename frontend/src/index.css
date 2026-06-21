@@ -618,14 +618,44 @@ body {
 }
 
 .voucher-detail-hero-image {
-  @apply relative flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-2xl bg-navy;
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.voucher-detail-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .voucher-detail-hero-brand {
-  @apply text-6xl font-extrabold text-white/20;
+  font-size: 3rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
+
 .voucher-detail-hero-badge {
-  @apply absolute left-4 top-4 rounded-md bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
 }
+
 .voucher-detail-brand-info {
   @apply mt-4;
 }

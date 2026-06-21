@@ -7,6 +7,18 @@ import {
   Plane,
   ShoppingBag,
   Home as HomeIcon,
+  Tag,
+  Dumbbell,
+  Car,
+  BookOpen,
+  Heart,
+  Music,
+  Coffee,
+  Gift,
+  Gamepad2,
+  Zap,
+  Star,
+  Baby,
 } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -16,14 +28,29 @@ import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../hooks/useAuth.jsx";
 
-const CATEGORIES = [
-  { key: "All Deals", icon: Sparkles, label: "All Deals" },
-  { key: "Food", icon: UtensilsCrossed, label: "Food" },
-  { key: "Tech", icon: Laptop, label: "Tech" },
-  { key: "Travel", icon: Plane, label: "Travel" },
-  { key: "Fashion", icon: ShoppingBag, label: "Fashion" },
-  { key: "Home", icon: HomeIcon, label: "Home" },
-];
+// Complete icon map with ALL icons from your database
+const ICON_MAP = {
+  UtensilsCrossed: UtensilsCrossed,
+  Laptop: Laptop,
+  Plane: Plane,
+  ShoppingBag: ShoppingBag,
+  Home: HomeIcon,
+  Sparkles: Sparkles,
+  Tag: Tag,
+  Dumbbell: Dumbbell,
+  Car: Car,
+  BookOpen: BookOpen,
+  Heart: Heart,
+  Music: Music,
+  Coffee: Coffee,
+  Gift: Gift,
+  Gamepad2: Gamepad2,
+  Zap: Zap,
+  Star: Star,
+  Baby: Baby,
+};
+
+const ALL_DEALS = { key: "All Deals", icon: Sparkles, label: "All Deals", color: "#F97316" };
 
 export default function Categories() {
   const { api } = useAuth();
@@ -41,21 +68,27 @@ export default function Categories() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categoryCounts, setCategoryCounts] = useState({});
-  const [categories, setCategories] = useState(CATEGORIES);
+  const [categories, setCategories] = useState([ALL_DEALS]);
 
   const fetchCategories = useCallback(() => {
     api
       .get("/categories")
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : (res.data?.categories ?? []);
-        if (data.length > 0) {
-          const dynamicCategories = data.map((cat) => ({
+
+        // Filter to only show active categories
+        const activeCategories = data.filter(cat => cat.status === "active");
+
+        if (activeCategories.length > 0) {
+          const dynamicCategories = activeCategories.map((cat) => ({
             key: cat.name,
             label: cat.name,
-            icon: CATEGORIES.find((c) => c.key === cat.name)?.icon || Sparkles,
+            icon: ICON_MAP[cat.icon] || Tag,
+            color: cat.color || "#F97316", // Use color from database
           }));
-          // Always keep "All Deals" first, then append dynamic categories
-          setCategories([CATEGORIES[0], ...dynamicCategories]);
+          setCategories([ALL_DEALS, ...dynamicCategories]);
+        } else {
+          setCategories([ALL_DEALS]);
         }
       })
       .catch(() => {
@@ -105,7 +138,7 @@ export default function Categories() {
     fetchCategoryCounts();
   }, [fetchCategories, fetchCategoryCounts]);
 
-  const activeMeta = categories.find((c) => c.key === activeCategory) ?? { label: "All Deals" };
+  const activeMeta = categories.find((c) => c.key === activeCategory) ?? { label: "All Deals", color: "#F97316" };
 
   useEffect(() => {
     const categoryFromUrl = searchParams.get("category") || "All Deals";
@@ -167,7 +200,7 @@ export default function Categories() {
       <main className="cat-main">
         {/* Category cards */}
         <div className="cat-grid" role="list" aria-label="Voucher categories">
-          {categories.map(({ key, icon: Icon, label }) => {
+          {categories.map(({ key, icon: Icon, label, color }) => {
             const isActive = activeCategory === key;
             const count = categoryCounts[key];
             return (
@@ -178,9 +211,18 @@ export default function Categories() {
                 aria-pressed={isActive}
                 onClick={() => handleCategoryChange(key)}
                 className={`cat-card ${isActive ? "cat-card-active" : ""}`}
+                style={{
+                  '--category-color': color,
+                  '--category-color-light': `${color}15`,
+                  '--category-color-border': `${color}40`,
+                }}
               >
                 <div
                   className={`cat-card-icon ${isActive ? "cat-card-icon-active" : ""}`}
+                  style={{
+                    backgroundColor: isActive ? `${color}20` : `${color}10`,
+                    color: color,
+                  }}
                 >
                   <Icon className="h-6 w-6" aria-hidden="true" />
                 </div>
@@ -247,11 +289,12 @@ export default function Categories() {
                 <VoucherCard
                   key={voucher._id ?? voucher.id}
                   brand={voucher.brand}
-                  category={voucher.category?.name ?? voucher.category_id?.name}
+                  category={voucher.category_id?.name}
+                  categoryIcon={voucher.category_id?.icon}      
+                  categoryColor={voucher.category_id?.color}    
                   title={voucher.title}
                   description={voucher.description}
                   cost={voucher.points}
-                  // pointsLabel={`${voucher.points} pts`}
                   badge={voucher.badge}
                   onGetCode={() =>
                     navigate(`/vouchers/${voucher._id ?? voucher.id}`)

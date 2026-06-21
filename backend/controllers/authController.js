@@ -209,3 +209,32 @@ exports.removeProfilePicture = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Admin creates a new user
+exports.adminCreateUser = async (req, res) => {
+  try {
+    const { email, username, fullName, password, role, points, is_active } = req.body;
+    
+    // Check if email is already taken
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(409).json({ message: "Email is already in use" });
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      email,
+      username,
+      fullName,
+      password: hash,
+      role: role || 'user',
+      points: points || 1000,
+      is_active: is_active !== undefined ? is_active : true
+    });
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user.toObject();
+    res.status(201).json(userWithoutPassword);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

@@ -135,13 +135,16 @@ export default function Home() {
               <VoucherCard
                 key={voucher._id ?? voucher.id}
                 brand={voucher.brand}
-                category={voucher.category?.name ?? voucher.category_id?.name}
+                category={voucher.category_id?.name}
+                categoryIcon={voucher.category_id?.icon}
+                categoryColor={voucher.category_id?.color}
                 title={voucher.title}
                 description={voucher.description}
                 cost={voucher.points}
-                // pointsLabel={`${voucher.points} pts`}
                 badge={voucher.badge}
-                onGetCode={() => navigate(`/vouchers/${voucher._id ?? voucher.id}`)}
+                onGetCode={() =>
+                  navigate(`/vouchers/${voucher._id ?? voucher.id}`)
+                }
               />
             ))}
         </div>
