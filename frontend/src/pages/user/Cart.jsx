@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { Minus, Plus, Trash2, Info } from "lucide-react";
 import Navbar from "../../components/Navbar";
@@ -8,10 +7,9 @@ import Footer from "../../components/Footer";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../hooks/useAuth.jsx";
-import API_BASE_URL from "../../config/api";
 
 export default function Cart() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, api } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,8 +19,8 @@ export default function Cart() {
   useEffect(() => {
     let isMounted = true;
 
-    axios
-      .get(`${API_BASE_URL}/cart`)
+    api
+      .get("/cart")
       .then((res) => {
         if (!isMounted) return;
         const data = Array.isArray(res.data) ? res.data : res.data?.items ?? [];
@@ -53,7 +51,7 @@ export default function Cart() {
     setUpdatingItemIds((ids) => [...ids, id]);
 
     try {
-      const res = await axios.put(`${API_BASE_URL}/cart/${id}`, { quantity });
+      const res = await api.put(`/cart/${id}`, { quantity });
       setCartItems((items) =>
         items.map((i) => ((i._id ?? i.id) === id ? res.data : i))
       );
@@ -75,7 +73,7 @@ export default function Cart() {
     setCartItems((items) => items.filter((item) => (item._id ?? item.id) !== id));
 
     try {
-      await axios.delete(`${API_BASE_URL}/cart/${id}`);
+      await api.delete(`/cart/${id}`);
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
       if (itemToRemove) {
@@ -252,11 +250,28 @@ export default function Cart() {
                 onClick={async () => {
                   setRedeeming(true);
                   try {
-                    const res = await axios.post(`${API_BASE_URL}/cart/redeem`);
+                    const res = await api.post("/cart/redeem");
+
+                    // Update user points
                     updateUser({ ...user, points: res.data.newBalance });
+
+                    // Clear cart
                     setCartItems([]);
                     window.dispatchEvent(new Event("cartUpdated"));
-                    toast.success("Redemption successful! Check your email for voucher codes.");
+
+                    // Download PDF receipt
+                    if (res.data.receiptUrl) {
+                      const link = document.createElement("a");
+                      link.href = `http://localhost:5000${res.data.receiptUrl}`;
+                      link.download = `receipt-${res.data.orderNumber}.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+
+                    toast.success(
+                      "Redemption successful! Receipt downloaded and sent to your email."
+                    );
                   } catch (err) {
                     toast.error(err.response?.data?.message || "Redemption failed");
                   } finally {

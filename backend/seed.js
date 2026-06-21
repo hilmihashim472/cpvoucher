@@ -37,7 +37,7 @@ const seedData = async () => {
 
     // Create Users
     const admin = await User.create({
-      email: "admin@cpvoucher.com",
+      email: "admin@example.com",
       username: "Admin",
       fullName: "Admin User",
       password: hashedPassword,
@@ -54,7 +54,7 @@ const seedData = async () => {
     });
 
     const user2 = await User.create({
-      email: "jane@example.com",
+      email: "testpurpose049@gmail.com",
       username: "Jane Smith",
       fullName: "Jane Smith",
       password: hashedPassword,
@@ -159,12 +159,16 @@ const seedData = async () => {
         user: user1._id,
         voucher: vouchers[5]._id,
         quantity: 1,
+        pointsUsed: vouchers[5].points * 1,
+        orderNumber: `ORD-${Date.now()}-001`,
         timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
       },
       {
         user: user1._id,
         voucher: vouchers[4]._id,
         quantity: 2,
+        pointsUsed: vouchers[4].points * 2,
+        orderNumber: `ORD-${Date.now()}-002`,
         timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
       },
     ]);
@@ -172,9 +176,9 @@ const seedData = async () => {
 
     console.log("\n=== SEEDING COMPLETED SUCCESSFULLY ===");
     console.log("\nTest Accounts:");
-    console.log("Admin: admin@cpvoucher.com / password123");
-    console.log("User:  john@example.com / password123");
-    console.log("User:  jane@example.com / password123");
+    console.log("Admin: admin@gmail.com / password123");
+    console.log("User:  john@gmail.com / password123");
+    console.log("User:  jane@gmail.com / password123");
     console.log("\nCategories:", categories.map(c => c.name).join(", "));
     console.log("Total Vouchers:", vouchers.length);
 

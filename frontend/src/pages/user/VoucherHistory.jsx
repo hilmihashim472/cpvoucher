@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { Search, TrendingUp, Ticket, Wallet, ChevronRight } from "lucide-react";
 import Navbar from "../../components/Navbar";
@@ -8,7 +7,6 @@ import Footer from "../../components/Footer";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../hooks/useAuth.jsx";
-import API_BASE_URL from "../../config/api";
 
 const FILTER_TABS = ["All Orders", "Used"];
 const PAGE_SIZE = 5;
@@ -18,15 +16,15 @@ const STATUS_STYLES = {
 };
 
 export default function VoucherHistory() {
-  const { user } = useAuth();
+  const { user, api } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/orders/history`)
+    api
+      .get("/orders/history")
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         setOrders(data);

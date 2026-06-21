@@ -1,7 +1,9 @@
 const CartItem = require("../models/CartItem");
 const Voucher = require("../models/Voucher");
 const User = require("../models/User");
-const CartItemHistory = require('../models/CartItemHistory');
+const CartItemHistory = require("../models/CartItemHistory");
+const { generateReceiptPDF } = require("../services/receiptService");
+const { sendReceiptEmail } = require("../services/emailService");
 
 const redeemVouchers = async (req, res) => {
   try {
@@ -12,51 +14,88 @@ const redeemVouchers = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 1. Fetch cart items to calculate points on the server (Security & Accuracy)
-    const cartItems = await CartItem.find({ user: userId }).populate('voucher');
-    
+    // 1. Fetch cart items
+    const cartItems = await CartItem.find({ user: userId }).populate("voucher");
+
     if (cartItems.length === 0) {
       return res.status(400).json({ message: "Your cart is empty" });
     }
 
+    // 2. Calculate total points
     const serverTotalPoints = cartItems.reduce((acc, item) => {
-      const discount = item.voucher?.discountAmount || 0;
-      return acc + (discount * 10 * item.quantity);
+      const points = item.voucher?.points || 0;
+      return acc + points * item.quantity;
     }, 0);
 
-    console.log(`User ${user.username} (ID: ${userId}) attempting to redeem. Current: ${user.points}, Required: ${serverTotalPoints}`);
+    console.log(
+      `User ${user.username} attempting to redeem. Current: ${user.points}, Required: ${serverTotalPoints}`,
+    );
 
-    // 2. Server-side validation
+    // 3. Validate points
     if (user.points < serverTotalPoints) {
       return res.status(400).json({ message: "Insufficient points balance" });
     }
 
-    // 3. Deduction Logic
-    user.points -= serverTotalPoints;
+    // 4. Generate unique order number
+    const orderNumber = `ORD-${Date.now()}-${userId.toString().slice(-6).toUpperCase()}`;
 
-    // 4. Persist the change to the User collection
+    // 5. Deduct points
+    user.points -= serverTotalPoints;
     await user.save();
 
-    // 5. Create history records
-    const historyRecords = cartItems.map(item => ({
+    // 6. Create history records with receipt info
+    const historyRecords = cartItems.map((item) => ({
       user: userId,
       voucher: item.voucher._id,
       quantity: item.quantity,
-      timestamp: new Date()
+      pointsUsed: item.voucher.points * item.quantity,
+      discountAmount: (item.voucher.discountAmount || 0) * item.quantity,
+      orderNumber: orderNumber,
+      timestamp: new Date(),
     }));
 
-    await CartItemHistory.insertMany(historyRecords);
+    const savedHistory = await CartItemHistory.insertMany(historyRecords);
+
+    // 7. Generate PDF receipt
+    const orderData = {
+      orderNumber,
+      items: cartItems,
+      totalPoints: serverTotalPoints,
+      timestamp: new Date(),
+    };
+
+    const pdfResult = await generateReceiptPDF(orderData, user);
+
+    // 8. Update history records with receipt URL
+    await CartItemHistory.updateMany(
+      { orderNumber: orderNumber },
+      { receiptUrl: pdfResult.url },
+    );
+
+    // 9. Send email with PDF attachment
+    try {
+      await sendReceiptEmail(user, orderData, pdfResult.filepath);
+      console.log("✅ Receipt email sent to", user.email);
+    } catch (emailError) {
+      console.error("❌ Failed to send email:", emailError);
+      // Don't fail the whole request if email fails
+    }
+
+    // 10. Clear cart
     await CartItem.deleteMany({ user: userId });
 
-    // 6. Return the updated point balance to the frontend
-    res.status(200).json({ 
-      message: "Redemption successful", 
-      newBalance: user.points 
+    // 11. Return response
+    res.status(200).json({
+      message: "Redemption successful",
+      newBalance: user.points,
+      orderNumber: orderNumber,
+      receiptUrl: pdfResult.url,
     });
-
   } catch (error) {
     console.error("Redeem Error:", error);
-    res.status(500).json({ message: "Internal server error during redemption" });
+    res
+      .status(500)
+      .json({ message: "Internal server error during redemption" });
   }
 };
 
@@ -85,10 +124,15 @@ exports.addToCart = async (req, res) => {
 
     const qty = Number(quantity) || 1;
     if (!Number.isInteger(qty) || qty < 1) {
-      return res.status(400).json({ message: "quantity must be a positive integer" });
+      return res
+        .status(400)
+        .json({ message: "quantity must be a positive integer" });
     }
 
-    let cartItem = await CartItem.findOne({ user: req.userId, voucher: voucherId });
+    let cartItem = await CartItem.findOne({
+      user: req.userId,
+      voucher: voucherId,
+    });
 
     if (cartItem) {
       cartItem.quantity += qty;
@@ -113,17 +157,20 @@ exports.updateCartItem = async (req, res) => {
     const qty = Number(req.body.quantity);
 
     if (!Number.isInteger(qty) || qty < 1) {
-      return res.status(400).json({ message: "quantity must be a positive integer" });
+      return res
+        .status(400)
+        .json({ message: "quantity must be a positive integer" });
     }
 
     // Improved: Ensure the cart item belongs to the authenticated user
     const cartItem = await CartItem.findOneAndUpdate(
       { _id: req.params.id, user: req.userId },
       { quantity: qty },
-      { new: true }
+      { new: true },
     ).populate("voucher");
 
-    if (!cartItem) return res.status(404).json({ message: "Cart item not found" });
+    if (!cartItem)
+      return res.status(404).json({ message: "Cart item not found" });
 
     res.json(cartItem);
   } catch (error) {
@@ -134,9 +181,13 @@ exports.updateCartItem = async (req, res) => {
 exports.removeCartItem = async (req, res) => {
   try {
     // Improved: Ensure the cart item belongs to the authenticated user
-    const cartItem = await CartItem.findOneAndDelete({ _id: req.params.id, user: req.userId });
+    const cartItem = await CartItem.findOneAndDelete({
+      _id: req.params.id,
+      user: req.userId,
+    });
 
-    if (!cartItem) return res.status(404).json({ message: "Cart item not found" });
+    if (!cartItem)
+      return res.status(404).json({ message: "Cart item not found" });
 
     res.json({ message: "Item removed from cart" });
   } catch (error) {

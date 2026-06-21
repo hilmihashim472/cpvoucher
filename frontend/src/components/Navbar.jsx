@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, Bell, ShoppingCart, Menu, X, Coins, User, LogOut } from "lucide-react";
-import axios from "axios";
-import API_BASE_URL from "../config/api";
 import { useAuth } from "../hooks/useAuth.jsx";
 
 const NAV_LINKS = [
@@ -28,20 +26,22 @@ export default function Navbar({ variant = "default" }) {
 
   const isActive = (to) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
 
+  const { api } = useAuth();
+
   const loadCartCount = useCallback(() => {
     if (variant !== "default") return;
 
-    axios
-      .get(`${API_BASE_URL}/cart`)
+    api
+      .get("/cart")
       .then((res) => {
         const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
-        const totalQuantity = items.reduce((sum, item) => sum + (item.quantity ?? 1), 0);
+        const totalQuantity = items.reduce((sum, item) => sum + (item.id ?? 1), 0);
         setCartCount(totalQuantity);
       })
       .catch(() => {
         setCartCount(0);
       });
-  }, [variant]);
+  }, [variant, api]);
 
   useEffect(() => {
     if (variant !== "default") return;
@@ -106,13 +106,13 @@ export default function Navbar({ variant = "default" }) {
                   <Coins className="navbar-points-icon" aria-hidden="true" />
                   <span className="navbar-points-text">{(user.points ?? 0).toLocaleString()} pts</span>
                 </div>
-                <button
+                {/* <button
                   type="button"
                   aria-label="View notifications"
                   className="navbar-icon-button"
                 >
                   <Bell className="h-5 w-5" aria-hidden="true" />
-                </button>
+                </button> */}
                 <Link
                   to="/cart"
                   aria-label={`View cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}

@@ -108,3 +108,42 @@ exports.deleteVoucher = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getCategoryCounts = async (req, res) => {
+  try {
+    const Category = require("../models/Category");
+
+    // Aggregate vouchers grouped by category_id
+    const counts = await Voucher.aggregate([
+      { $group: { _id: "$category_id", count: { $sum: 1 } } }
+    ]);
+
+    // Fetch all category documents so we can map _id → name
+    const categories = await Category.find({});
+    const categoryMap = {};
+    categories.forEach((cat) => {
+      categoryMap[cat._id.toString()] = cat.name;
+    });
+
+    // Build the final response { Food: 91, Tech: 60, "All Deals": 312 }
+    const result = {};
+    let total = 0;
+
+    counts.forEach(({ _id, count }) => {
+      if (_id) {
+        const name = categoryMap[_id.toString()];
+        if (name) {
+          result[name] = count;
+          total += count;
+        }
+      }
+    });
+
+    result["All Deals"] = total;
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error in getCategoryCounts:", err);
+    res.status(500).json({ message: err.message });
+  }
+};

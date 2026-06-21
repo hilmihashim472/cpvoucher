@@ -4,6 +4,8 @@ const router = require('express').Router();
 const c = require('../controllers/voucherController');
 const auth = require('../middleware/auth');
 
+const { getCategoryCounts } = c;
+
 const adminOnly = (req, res, next) => {
   if (req.user?.role !== "admin") {
     return res.status(403).json({ message: "Admin access required" });
@@ -12,6 +14,8 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
+
+router.get("/category-counts", getCategoryCounts);
 router.post('/', auth, adminOnly, c.createVoucher);
 router.get('/', c.getVouchers);
 router.get('/:id', c.getVoucherById);

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import {
   ArrowLeft, Send, FileText, ChevronDown,
@@ -9,7 +8,7 @@ import {
   Music, Coffee, Gift, Gamepad2, Tag, Zap, Star, Baby,
 } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const ICON_OPTIONS = [
   { name: "UtensilsCrossed", Icon: UtensilsCrossed },
@@ -125,6 +124,7 @@ function LivePreview({ form }) {
 }
 
 export default function AddCategory() {
+  const { api } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
@@ -158,7 +158,7 @@ export default function AddCategory() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/admin/categories`, { ...form, status });
+      await api.post("/admin/categories", { ...form, status });
       toast.success(
         status === "active" ? "Category published!" : "Saved as draft."
       );
