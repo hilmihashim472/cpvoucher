@@ -1,5 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./hooks/useAuth.jsx";
+import LandingPage from "./pages/shared/Landing";
 import HomePage from "./pages/user/Home";
 import CategoriesPage from "./pages/user/Categories";
 import VoucherDetailPage from "./pages/user/VoucherDetail";
@@ -16,18 +18,62 @@ import OrderListPage from "./pages/admin/OrderList";
 import CategoryListPage from "./pages/admin/CategoryList";
 import AddCategoryPage from "./pages/admin/AddCategory";
 import AdminRoute from "./components/AdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Toaster position="top-right" />
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/categories" element={<CategoriesPage />} />
-        <Route path="/vouchers/:id" element={<VoucherDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/orders" element={<OrderHistoryPage />} />
-        <Route path="/profile" element={<ProfileUserPage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <CategoriesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vouchers/:id"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <VoucherDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <OrderHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={["user"]}>
+              <ProfileUserPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
@@ -87,7 +133,7 @@ function App() {
           }
         />
       </Routes>
-    </>
+    </AuthProvider>
   );
 }
 

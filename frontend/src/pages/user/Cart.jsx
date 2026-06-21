@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { Minus, Plus, Trash2, Info } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
-import useAuth from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth.jsx";
 import API_BASE_URL from "../../config/api";
 
 export default function Cart() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [redeeming, setRedeeming] = useState(false);
+  const [updatingItemIds, setUpdatingItemIds] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -37,25 +40,54 @@ export default function Cart() {
     };
   }, []);
 
-  const updateQuantity = (id, delta) => {
+  const updateQuantity = async (id, delta) => {
     const item = cartItems.find((i) => (i._id ?? i.id) === id);
     if (!item) return;
-    const quantity = Math.max(1, (item.quantity ?? 1) + delta);
+    const previousQuantity = item.quantity ?? 1;
+    const quantity = Math.max(1, previousQuantity + delta);
+    if (quantity === previousQuantity || updatingItemIds.includes(id)) return;
 
     setCartItems((items) =>
       items.map((i) => ((i._id ?? i.id) === id ? { ...i, quantity } : i))
     );
+    setUpdatingItemIds((ids) => [...ids, id]);
 
-    axios.patch(`${API_BASE_URL}/cart/${id}`, { quantity }).catch(() => {});
+    try {
+      const res = await axios.put(`${API_BASE_URL}/cart/${id}`, { quantity });
+      setCartItems((items) =>
+        items.map((i) => ((i._id ?? i.id) === id ? res.data : i))
+      );
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      setCartItems((items) =>
+        items.map((i) =>
+          (i._id ?? i.id) === id ? { ...i, quantity: previousQuantity } : i
+        )
+      );
+      toast.error(err.response?.data?.message || "Failed to update quantity");
+    } finally {
+      setUpdatingItemIds((ids) => ids.filter((itemId) => itemId !== id));
+    }
   };
 
-  const removeItem = (id) => {
+  const removeItem = async (id) => {
+    const itemToRemove = cartItems.find((item) => (item._id ?? item.id) === id);
     setCartItems((items) => items.filter((item) => (item._id ?? item.id) !== id));
-    axios.delete(`${API_BASE_URL}/cart/${id}`).catch(() => {});
+
+    try {
+      await axios.delete(`${API_BASE_URL}/cart/${id}`);
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      if (itemToRemove) {
+        setCartItems((items) => [...items, itemToRemove]);
+      }
+      toast.error(err.response?.data?.message || "Failed to remove item");
+    }
   };
 
+  const totalQuantity = cartItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0);
   const totalCost = cartItems.reduce(
-    (sum, item) => sum + (item.pointsCost ?? 0) * (item.quantity ?? 1),
+    (sum, item) => sum + (item.voucher?.points ?? 0) * (item.quantity ?? 1),
     0
   );
   const remainingBalance = (user.points ?? 0) - totalCost;
@@ -71,7 +103,7 @@ export default function Cart() {
             <div className="cart-header">
               <h1 className="cart-title">Shopping Cart</h1>
               <span className="cart-item-count">
-                {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
+                {totalQuantity} item{totalQuantity === 1 ? "" : "s"}
               </span>
             </div>
 
@@ -95,7 +127,7 @@ export default function Cart() {
                   title="Your cart is empty"
                   description="Browse trending vouchers and add them to your cart to redeem with points."
                   action={
-                    <Link to="/" className="cart-browse-link">
+                    <Link to="/home" className="cart-browse-link">
                       Browse Vouchers
                     </Link>
                   }
@@ -106,22 +138,23 @@ export default function Cart() {
                 !error &&
                 cartItems.map((item) => {
                   const id = item._id ?? item.id;
+                  const voucher = item.voucher || {};
+                  const isUpdating = updatingItemIds.includes(id);
                   return (
                     <div key={id} className="cart-item">
                       <div className="cart-item-icon" aria-hidden="true">
-                        {item.brand?.charAt(0)}
+                        {voucher.brand?.charAt(0)}
                       </div>
                       <div className="cart-item-info">
                         <div className="cart-item-tags">
-                          <span className="cart-item-category-tag">{item.category}</span>
-                          {item.expiringSoon && (
-                            <span className="cart-item-expiring-tag">Expiring Soon</span>
-                          )}
+                          <span className="cart-item-category-tag">
+                            {voucher.category?.name || "General"}
+                          </span>
                         </div>
-                        <h3 className="cart-item-title">{item.title}</h3>
-                        <p className="cart-item-description">{item.description}</p>
+                        <h3 className="cart-item-title">{voucher.title}</h3>
+                        <p className="cart-item-description">{voucher.description}</p>
                         <p className="cart-item-price">
-                          {Number(item.pointsCost ?? 0).toLocaleString()} pts per unit
+                          {Number(voucher.points ?? 0).toLocaleString()} pts per unit
                         </p>
                       </div>
                       <div className="cart-item-actions">
@@ -130,6 +163,7 @@ export default function Cart() {
                             type="button"
                             aria-label={`Decrease quantity of ${item.title}`}
                             onClick={() => updateQuantity(id, -1)}
+                            disabled={isUpdating || (item.quantity ?? 1) <= 1}
                             className="cart-quantity-button"
                           >
                             <Minus className="h-4 w-4" aria-hidden="true" />
@@ -139,6 +173,7 @@ export default function Cart() {
                             type="button"
                             aria-label={`Increase quantity of ${item.title}`}
                             onClick={() => updateQuantity(id, 1)}
+                            disabled={isUpdating}
                             className="cart-quantity-button"
                           >
                             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -213,13 +248,27 @@ export default function Cart() {
 
               <button
                 type="button"
-                disabled={cartItems.length === 0 || remainingBalance < 0}
+                disabled={cartItems.length === 0 || remainingBalance < 0 || redeeming}
+                onClick={async () => {
+                  setRedeeming(true);
+                  try {
+                    const res = await axios.post(`${API_BASE_URL}/cart/redeem`);
+                    updateUser({ ...user, points: res.data.newBalance });
+                    setCartItems([]);
+                    window.dispatchEvent(new Event("cartUpdated"));
+                    toast.success("Redemption successful! Check your email for voucher codes.");
+                  } catch (err) {
+                    toast.error(err.response?.data?.message || "Redemption failed");
+                  } finally {
+                    setRedeeming(false);
+                  }
+                }}
                 className="cart-place-order-button"
               >
-                Place Order →
+                {redeeming ? "Processing…" : "Place Order →"}
               </button>
 
-              <Link to="/" className="cart-continue-link">
+              <Link to="/home" className="cart-continue-link">
                 Continue Shopping
               </Link>
             </div>

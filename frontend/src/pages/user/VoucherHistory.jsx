@@ -7,71 +7,49 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
-import useAuth from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth.jsx";
 import API_BASE_URL from "../../config/api";
 
-const FILTER_TABS = ["All Orders", "Active", "Used", "Expired"];
+const FILTER_TABS = ["All Orders", "Used"];
 const PAGE_SIZE = 5;
 
-// TODO: replace with GET /api/users/me/stats once available
-const LIFETIME_STATS = {
-  lifetimeSavings: 1248.5,
-  vouchersRedeemed: 42,
-  brandsCount: 18,
-};
-
 const STATUS_STYLES = {
-  Active: "history-status-active",
   Used: "history-status-used",
-  Expired: "history-status-expired",
 };
 
 export default function VoucherHistory() {
   const { user } = useAuth();
-  const [filter, setFilter] = useState("All Orders");
-  const [search, setSearch] = useState("");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      axios
-        .get(`${API_BASE_URL}/orders`, {
-          params: { status: filter, q: search },
-        })
-        .then((res) => {
-          const data = Array.isArray(res.data) ? res.data : res.data?.orders ?? [];
-          setOrders(data);
-          setError(null);
-          setPage(1);
-        })
-        .catch(() => {
-          setError("Unable to load your order history right now. Please try again later.");
-        })
-        .finally(() => setLoading(false));
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [filter, search]);
+    axios
+      .get(`${API_BASE_URL}/orders/history`)
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        setOrders(data);
+        setError(null);
+      })
+      .catch(() => {
+        setError("Unable to load your order history right now. Please try again later.");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const totalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE));
   const paginatedOrders = orders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleFilterChange = (tab) => {
-    setLoading(true);
-    setFilter(tab);
-  };
-
-  const handleSearchChange = (value) => {
-    setLoading(true);
-    setSearch(value);
-  };
-
   const handleReportIssue = (order) => {
-    toast.success(`Issue reported for "${order.voucherName}". Our team will follow up shortly.`);
+    toast.success(`Issue reported for "${order.voucher?.title}". Our team will follow up shortly.`);
   };
+
+  const lifetimeSavings = orders.reduce((acc, order) => {
+    const discount = order.voucher?.discountAmount || 0;
+    return acc + (discount * order.quantity);
+  }, 0);
+  const brandsCount = new Set(orders.map(o => o.voucher?.brand)).size;
 
   return (
     <div className="page-shell">
@@ -90,8 +68,8 @@ export default function VoucherHistory() {
               <TrendingUp className="h-4 w-4" aria-hidden="true" />
               <span className="history-stat-label">Lifetime Savings</span>
             </div>
-            <p className="history-stat-value">${LIFETIME_STATS.lifetimeSavings.toFixed(2)}</p>
-            <p className="history-stat-change">12% increase this month</p>
+            <p className="history-stat-value">${loading ? "..." : lifetimeSavings.toFixed(2)}</p>
+            <p className="history-stat-change">Total value saved</p>
           </div>
 
           <div className="history-stat-card">
@@ -99,9 +77,9 @@ export default function VoucherHistory() {
               <Ticket className="h-4 w-4" aria-hidden="true" />
               <span className="history-stat-label">Total Vouchers Redeemed</span>
             </div>
-            <p className="history-stat-value">{LIFETIME_STATS.vouchersRedeemed}</p>
+            <p className="history-stat-value">{loading ? "..." : orders.length}</p>
             <p className="history-stat-note">
-              Across {LIFETIME_STATS.brandsCount} different brands
+              Across {loading ? "..." : brandsCount} different brands
             </p>
           </div>
 
@@ -116,37 +94,6 @@ export default function VoucherHistory() {
             <Link to="/" className="history-redeem-link">
               Redeem Now
             </Link>
-          </div>
-        </div>
-
-        {/* Search + filter tabs */}
-        <div className="history-toolbar">
-          <label className="history-search-label">
-            <span className="sr-only">Search orders</span>
-            <Search className="history-search-icon" aria-hidden="true" />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Search by voucher name..."
-              className="history-search-input"
-            />
-          </label>
-
-          <div className="history-filter-tabs scrollbar-hide">
-            {FILTER_TABS.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => handleFilterChange(tab)}
-                aria-pressed={filter === tab}
-                className={`history-filter-tab ${
-                  filter === tab ? "history-filter-tab-active" : "history-filter-tab-inactive"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -192,38 +139,25 @@ export default function VoucherHistory() {
                   <tbody className="history-table-body">
                     {paginatedOrders.map((order) => {
                       const id = order._id ?? order.id;
+                      const voucher = order.voucher || {};
                       return (
                         <tr key={id}>
-                          <td className="history-table-cell-strong">{order.voucherName}</td>
-                          <td className="history-table-cell">{order.redemptionDate}</td>
+                          <td className="history-table-cell-strong">{voucher.title || "Unknown Voucher"}</td>
                           <td className="history-table-cell">
-                            {Number(order.pointsUsed ?? 0).toLocaleString()}
+                            {new Date(order.timestamp).toLocaleDateString()}
+                          </td>
+                          <td className="history-table-cell">
+                            {Number(voucher.points ?? 0).toLocaleString()}
                           </td>
                           <td className="history-table-cell-status">
-                            <span
-                              className={`history-status-badge ${
-                                STATUS_STYLES[order.status] ?? "history-status-default"
-                              }`}
-                            >
-                              {order.status}
+                            <span className={`history-status-badge ${STATUS_STYLES["Used"] ?? "history-status-default"}`}>
+                              Used
                             </span>
                           </td>
                           <td className="history-table-cell-status">
-                            {order.status === "Used" && (
-                              <Link to={`/vouchers/${order.voucherId ?? id}`} className="history-view-link">
-                                View Details
-                              </Link>
-                            )}
-                            {order.status === "Expired" && (
-                              <button
-                                type="button"
-                                onClick={() => handleReportIssue(order)}
-                                className="history-report-button"
-                              >
-                                Report Issue
-                              </button>
-                            )}
-                            {order.status === "Active" && <span className="history-table-dash">—</span>}
+                            <Link to={`/vouchers/${voucher._id ?? id}`} className="history-view-link">
+                              View Details
+                            </Link>
                           </td>
                         </tr>
                       );

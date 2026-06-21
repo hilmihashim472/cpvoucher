@@ -7,7 +7,7 @@ import {
   Tag,
   Plus,
 } from "lucide-react";
-import useAuth from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth.jsx";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },

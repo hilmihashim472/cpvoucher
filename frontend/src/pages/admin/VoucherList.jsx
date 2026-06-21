@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 import { Search, Plus, Eye, Pencil, Trash2 } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
-import { MOCK_VOUCHERS } from "./mockData";
-
-const STATUS_FILTERS = ["All", "Active", "Expired", "Draft"];
+import InlineError from "../../components/InlineError";
+import API_BASE_URL from "../../config/api";
 
 const STATUS_STYLES = {
   active: "vlist-badge-active",
@@ -14,15 +15,28 @@ const STATUS_STYLES = {
 
 export default function VoucherList() {
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [vouchers, setVouchers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filtered = MOCK_VOUCHERS.filter((v) => {
+  useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/vouchers`)
+      .then((res) => {
+        setVouchers(Array.isArray(res.data) ? res.data : []);
+        setError(null);
+      })
+      .catch(() => {
+        setError("Unable to load vouchers");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = vouchers.filter((v) => {
     const matchesSearch =
       v.title.toLowerCase().includes(search.toLowerCase()) ||
-      v.category.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter =
-      activeFilter === "All" || v.status === activeFilter.toLowerCase();
-    return matchesSearch && matchesFilter;
+      v.category?.name?.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
   });
 
   return (
@@ -54,86 +68,86 @@ export default function VoucherList() {
               />
             </label>
             <div className="vlist-filter-tabs" role="tablist" aria-label="Filter by status">
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f}
-                  role="tab"
-                  aria-selected={activeFilter === f}
-                  onClick={() => setActiveFilter(f)}
-                  className={`vlist-filter-tab ${activeFilter === f ? "vlist-filter-tab-active" : "vlist-filter-tab-inactive"}`}
-                >
-                  {f}
-                </button>
-              ))}
+              <button
+                role="tab"
+                aria-selected={true}
+                className={`vlist-filter-tab vlist-filter-tab-active`}
+              >
+                All
+              </button>
             </div>
           </div>
 
           <div className="vlist-table-card">
-            <div className="vlist-table-scroll">
-              <table className="vlist-table" aria-label="Voucher list">
-                <thead className="vlist-table-head">
-                  <tr>
-                    <th className="vlist-th">Voucher</th>
-                    <th className="vlist-th">Category</th>
-                    <th className="vlist-th">Points</th>
-                    <th className="vlist-th">Uses</th>
-                    <th className="vlist-th">Status</th>
-                    <th className="vlist-th">Expiry</th>
-                    <th className="vlist-th sr-only">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="vlist-table-body">
-                  {filtered.length === 0 && (
+            {loading ? (
+              <div className="vlist-table-loading">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="vlist-table-skeleton-row" />
+                ))}
+              </div>
+            ) : error ? (
+              <div className="vlist-table-padding">
+                <InlineError message={error} />
+              </div>
+            ) : (
+              <div className="vlist-table-scroll">
+                <table className="vlist-table" aria-label="Voucher list">
+                  <thead className="vlist-table-head">
                     <tr>
-                      <td colSpan={7} className="vlist-empty-cell">
-                        No vouchers match your search.
-                      </td>
+                      <th className="vlist-th">Voucher</th>
+                      <th className="vlist-th">Category</th>
+                      <th className="vlist-th">Points</th>
+                      <th className="vlist-th">Brand</th>
+                      <th className="vlist-th">Actions</th>
                     </tr>
-                  )}
-                  {filtered.map((v) => (
-                    <tr key={v.id} className="vlist-row">
-                      <td className="vlist-td-title">{v.title}</td>
-                      <td className="vlist-td">
-                        <span className="vlist-category-badge">{v.category}</span>
-                      </td>
-                      <td className="vlist-td vlist-td-points">{v.points.toLocaleString()} pts</td>
-                      <td className="vlist-td">{v.uses.toLocaleString()}</td>
-                      <td className="vlist-td">
-                        <span className={`vlist-status-badge ${STATUS_STYLES[v.status]}`}>
-                          {v.status}
-                        </span>
-                      </td>
-                      <td className="vlist-td">{v.expiry}</td>
-                      <td className="vlist-td">
-                        <div className="vlist-actions-row">
-                          <button
-                            type="button"
-                            aria-label={`View ${v.title}`}
-                            className="vlist-action-button"
-                          >
-                            <Eye className="h-4 w-4" aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${v.title}`}
-                            className="vlist-action-button"
-                          >
-                            <Pencil className="h-4 w-4" aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Delete ${v.title}`}
-                            className="vlist-action-button vlist-action-delete"
-                          >
-                            <Trash2 className="h-4 w-4" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="vlist-table-body">
+                    {filtered.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="vlist-empty-cell">
+                          No vouchers match your search.
+                        </td>
+                      </tr>
+                    )}
+                    {filtered.map((v) => (
+                      <tr key={v._id} className="vlist-row">
+                        <td className="vlist-td-title">{v.title}</td>
+                        <td className="vlist-td">
+                          <span className="vlist-category-badge">{v.category?.name || "General"}</span>
+                        </td>
+                        <td className="vlist-td vlist-td-points">{v.points.toLocaleString()} pts</td>
+                        <td className="vlist-td">{v.brand}</td>
+                        <td className="vlist-td">
+                          <div className="vlist-actions-row">
+                            <Link to={`/vouchers/${v._id}`} className="vlist-action-button" aria-label={`View ${v.title}`}>
+                              <Eye className="h-4 w-4" aria-hidden="true" />
+                            </Link>
+                            <Link to={`/admin/vouchers/add?id=${v._id}`} className="vlist-action-button" aria-label={`Edit ${v.title}`}>
+                              <Pencil className="h-4 w-4" aria-hidden="true" />
+                            </Link>
+                            <button
+                              type="button"
+                              aria-label={`Delete ${v.title}`}
+                              className="vlist-action-button vlist-action-delete"
+                              onClick={() => {
+                                if (window.confirm(`Delete "${v.title}"?`)) {
+                                  axios.delete(`${API_BASE_URL}/vouchers/${v._id}`).then(() => {
+                                    setVouchers(vouchers.filter(item => item._id !== v._id));
+                                    toast.success("Voucher deleted");
+                                  }).catch(() => toast.error("Failed to delete"));
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <div className="vlist-footer">
               <span className="vlist-footer-count">
                 {filtered.length} voucher{filtered.length !== 1 ? "s" : ""}

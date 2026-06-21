@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, User, Check } from "lucide-react";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURES = [
   "Completely free to join",
@@ -29,6 +28,7 @@ function validate(form, agreed) {
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -61,17 +61,13 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/auth/register`, {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-      });
-      toast.success("Account created! Welcome to VoucherHub.");
-      navigate("/");
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ?? "Registration failed. Please try again.";
-      toast.error(msg);
+      const result = await register(form.name, form.email, form.password);
+      if (result.success) {
+        toast.success("Account created! Welcome to VoucherHub.");
+        navigate("/home");
+      } else {
+        toast.error(result.message || "Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

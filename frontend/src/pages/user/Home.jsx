@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Search, Copy, Check } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import CategoryPill from "../../components/CategoryPill";
 import VoucherCard from "../../components/VoucherCard";
 import SkeletonCard from "../../components/SkeletonCard";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
 import API_BASE_URL from "../../config/api";
-
-const CATEGORIES = ["All Deals", "Food", "Tech", "Travel", "Fashion", "Home"];
 
 const FEATURED_PARTNERS = [
   { name: "Starbucks", code: "SBUX-FREE-50", remaining: 120, total: 500 },
@@ -20,14 +17,18 @@ const FEATURED_PARTNERS = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState("All Deals");
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copiedCode, setCopiedCode] = useState(null);
 
-  const fetchVouchers = useCallback((params) => {
+  const fetchVouchers = useCallback((search = "") => {
+    setLoading(true);
+    const params = {};
+    if (search) params.search = search;
+    
     axios
       .get(`${API_BASE_URL}/vouchers`, { params })
       .then((res) => {
@@ -42,18 +43,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetchVouchers({ category: activeCategory });
-  }, [activeCategory, fetchVouchers]);
-
-  const handleCategoryChange = (category) => {
-    setLoading(true);
-    setActiveCategory(category);
-  };
+    const searchFromUrl = searchParams.get("search") || "";
+    setSearchQuery(searchFromUrl);
+    fetchVouchers(searchFromUrl);
+  }, [searchParams, fetchVouchers]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    fetchVouchers({ category: activeCategory, search: searchQuery });
+    if (searchQuery.trim()) {
+      navigate(`/home?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate("/home");
+    }
   };
 
   const handleCopyCode = (code) => {
@@ -95,20 +96,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Category filter pills */}
-      <section className="home-categories">
-        <div className="home-categories-row scrollbar-hide">
-          {CATEGORIES.map((category) => (
-            <CategoryPill
-              key={category}
-              label={category}
-              active={activeCategory === category}
-              onClick={() => handleCategoryChange(category)}
-            />
-          ))}
-        </div>
-      </section>
-
       {/* Trending vouchers */}
       <section id="trending-vouchers" className="home-trending">
         <div className="home-trending-header">
@@ -118,7 +105,7 @@ export default function Home() {
               Curated deals based on your recent activity.
             </p>
           </div>
-          <button type="button" onClick={() => handleCategoryChange("All Deals")} className="home-view-all">
+          <button type="button" onClick={() => navigate("/categories")} className="home-view-all">
             View all →
           </button>
         </div>
@@ -148,11 +135,11 @@ export default function Home() {
               <VoucherCard
                 key={voucher._id ?? voucher.id}
                 brand={voucher.brand}
-                category={voucher.category}
+                category={voucher.category?.name ?? voucher.category_id?.name}
                 title={voucher.title}
                 description={voucher.description}
-                cost={voucher.cost ?? voucher.points}
-                pointsLabel={voucher.pointsLabel}
+                cost={voucher.points}
+                // pointsLabel={`${voucher.points} pts`}
                 badge={voucher.badge}
                 onGetCode={() => navigate(`/vouchers/${voucher._id ?? voucher.id}`)}
               />

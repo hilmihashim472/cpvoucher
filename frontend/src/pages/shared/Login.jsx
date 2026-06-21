@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, Check } from "lucide-react";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURES = [
   "300+ exclusive brand vouchers",
@@ -22,6 +21,7 @@ function validate(form) {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -43,13 +43,13 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/auth/login`, { ...form, rememberMe });
-      toast.success("Signed in successfully!");
-      navigate("/");
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ?? "Invalid email or password. Please try again.";
-      toast.error(msg);
+      const result = await login(form.email, form.password);
+      if (result.success) {
+        toast.success("Signed in successfully!");
+        navigate(result.user?.role === "admin" ? "/admin" : "/home");
+      } else {
+        toast.error(result.message || "Invalid email or password. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
