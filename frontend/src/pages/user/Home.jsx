@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
 import { Search, Copy, Check } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -8,7 +7,7 @@ import VoucherCard from "../../components/VoucherCard";
 import SkeletonCard from "../../components/SkeletonCard";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURED_PARTNERS = [
   { name: "Starbucks", code: "SBUX-FREE-50", remaining: 120, total: 500 },
@@ -16,6 +15,7 @@ const FEATURED_PARTNERS = [
 ];
 
 export default function Home() {
+  const { api } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,9 +28,9 @@ export default function Home() {
     setLoading(true);
     const params = {};
     if (search) params.search = search;
-    
-    axios
-      .get(`${API_BASE_URL}/vouchers`, { params })
+
+    api
+      .get("/vouchers", { params })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : res.data?.vouchers ?? [];
         setVouchers(data);

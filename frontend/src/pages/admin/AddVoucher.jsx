@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { ArrowLeft, ChevronDown, ImagePlus, Send, FileText } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const CATEGORIES = [
   "Food & Beverage",
@@ -83,6 +82,7 @@ function LivePreview({ form }) {
 }
 
 export default function AddVoucher() {
+  const { api } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
@@ -103,7 +103,7 @@ export default function AddVoucher() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/admin/vouchers`, { ...form, status });
+      await api.post("/admin/vouchers", { ...form, status });
       toast.success(
         status === "active" ? "Voucher published successfully!" : "Saved as draft."
       );

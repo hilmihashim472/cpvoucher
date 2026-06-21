@@ -1,65 +1,175 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useCallback, useRef } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config/api";
 
+// ─────────────────────────────────────────────
+// 1. Dedicated axios instance — never pollutes
+//    global axios.defaults
+// ─────────────────────────────────────────────
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true, // sends httpOnly cookies automatically
+});
+
+// ─────────────────────────────────────────────
+// 2. Token stored only in memory (not localStorage)
+//    This prevents XSS token theft
+// ─────────────────────────────────────────────
+let _accessToken = null;
+
+export const getAccessToken = () => _accessToken;
+export const setAccessToken = (token) => { _accessToken = token; };
+export const clearAccessToken = () => { _accessToken = null; };
+
+// ─────────────────────────────────────────────
+// 3. Request interceptor — attaches Bearer token
+//    to every request automatically
+// ─────────────────────────────────────────────
+api.interceptors.request.use(
+  (config) => {
+    if (_accessToken) {
+      config.headers.Authorization = `Bearer ${_accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ─────────────────────────────────────────────
+// 4. Context
+// ─────────────────────────────────────────────
 const AuthContext = createContext(null);
 
+// ─────────────────────────────────────────────
+// 5. AuthProvider
+// ─────────────────────────────────────────────
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Tracks if a token refresh is already in-flight so we don't
+  // fire multiple refresh requests simultaneously
+  const isRefreshing = useRef(false);
+  const failedQueue = useRef([]);
+
+  // ── Helper: flush queued requests after a refresh attempt ──
+  const processQueue = (error, token = null) => {
+    failedQueue.current.forEach(({ resolve, reject }) => {
+      error ? reject(error) : resolve(token);
+    });
+    failedQueue.current = [];
+  };
+
+  // ── Helper: build clean user object from API response ──
+  const buildUserData = (data) => ({
+    id: data._id,
+    email: data.email,
+    username: data.username,
+    fullName: data.fullName,
+    name: data.fullName || data.username,
+    role: data.role,
+    points: data.points,
+    profilePicture: data.profile_picture,
+  });
+
+  // ─────────────────────────────────────────────
+  // 6. Response interceptor — handles 401s by
+  //    attempting a silent token refresh, then
+  //    retrying the original request.
+  //    Falls back to logout if refresh fails.
+  // ─────────────────────────────────────────────
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
 
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    }
+        // Only attempt refresh on 401, and not on the refresh
+        // endpoint itself to avoid infinite loops
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          !originalRequest.url.includes("/auth/refresh")
+        ) {
+          if (isRefreshing.current) {
+            // Queue this request until the refresh resolves
+            return new Promise((resolve, reject) => {
+              failedQueue.current.push({ resolve, reject });
+            })
+              .then((token) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return api(originalRequest);
+              })
+              .catch((err) => Promise.reject(err));
+          }
 
-    if (token && savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-        console.log("Restored session for user:", userData.email);
-      } catch (err) {
-        console.error("Failed to parse saved user data:", err);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+          originalRequest._retry = true;
+          isRefreshing.current = true;
+
+          try {
+            // Refresh token lives in httpOnly cookie — no JS access needed
+            const { data } = await api.post("/auth/refresh");
+            setAccessToken(data.accessToken);
+            processQueue(null, data.accessToken);
+            originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+            return api(originalRequest);
+          } catch (refreshError) {
+            processQueue(refreshError, null);
+            // Refresh failed — session is dead, log the user out
+            handleLogout();
+            return Promise.reject(refreshError);
+          } finally {
+            isRefreshing.current = false;
+          }
+        }
+
+        return Promise.reject(error);
       }
-    } else {
-      console.log("No saved session found");
-    }
-    setLoading(false);
+    );
+
+    // Clean up interceptor when provider unmounts
+    return () => api.interceptors.response.eject(interceptor);
   }, []);
 
-  const login = async (email, password) => {
+  // ─────────────────────────────────────────────
+  // 7. On app load — validate session with server
+  //    instead of blindly trusting localStorage
+  // ─────────────────────────────────────────────
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        // Server reads the httpOnly refresh cookie and issues
+        // a fresh access token if the session is still valid
+        const { data } = await api.post("/auth/refresh");
+        setAccessToken(data.accessToken);
+
+        const userRes = await api.get("/auth/me");
+        setUser(buildUserData(userRes.data));
+      } catch {
+        // No valid session — start fresh, no error needed
+        clearAccessToken();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  // ─────────────────────────────────────────────
+  // 8. Auth actions
+  // ─────────────────────────────────────────────
+  const login = useCallback(async (email, password) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/login`, {
-        email,
-        password,
-      });
-      const { token } = res.data;
-      localStorage.setItem("token", token);
+      // Server sets httpOnly refresh cookie in the response
+      const { data } = await api.post("/auth/login", { email, password });
+      setAccessToken(data.accessToken);
 
-      // Get user info from /api/auth/me
-      const userRes = await axios.get(`${API_BASE_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const userData = {
-        id: userRes.data._id,
-        email: userRes.data.email,
-        username: userRes.data.username,
-        fullName: userRes.data.fullName,
-        name: userRes.data.fullName || userRes.data.username,
-        role: userRes.data.role,
-        points: userRes.data.points,
-        profilePicture: userRes.data.profile_picture,
-      };
-
-      localStorage.setItem("user", JSON.stringify(userData));
+      const userRes = await api.get("/auth/me");
+      const userData = buildUserData(userRes.data);
       setUser(userData);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
       return { success: true, user: userData };
     } catch (error) {
       return {
@@ -67,18 +177,16 @@ export const AuthProvider = ({ children }) => {
         message: error.response?.data?.message || "Login failed",
       };
     }
-  };
+  }, []);
 
-  const register = async (name, email, password) => {
+  const register = useCallback(async (name, email, password) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/auth/register`, {
+      await api.post("/auth/register", {
         username: name,
         email,
         password,
       });
-      const { id } = res.data;
-
-      // Auto login after register
+      // Auto-login after successful registration
       return await login(email, password);
     } catch (error) {
       return {
@@ -86,20 +194,31 @@ export const AuthProvider = ({ children }) => {
         message: error.response?.data?.message || "Registration failed",
       };
     }
-  };
+  }, [login]);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    delete axios.defaults.headers.common["Authorization"];
-    setUser(null);
-  };
+  // Extracted so the response interceptor can call it too
+  const handleLogout = useCallback(async () => {
+    try {
+      // Tell server to invalidate the refresh token / clear cookie
+      await api.post("/auth/logout");
+    } catch {
+      // Even if the server call fails, clear client state
+    } finally {
+      clearAccessToken();
+      setUser(null);
+    }
+  }, []);
 
-  const updateUser = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
+  const logout = useCallback(() => handleLogout(), [handleLogout]);
 
+  const updateUser = useCallback((userData) => {
+    // Only update in React state — no localStorage
+    setUser((prev) => ({ ...prev, ...userData }));
+  }, []);
+
+  // ─────────────────────────────────────────────
+  // 9. Provide values
+  // ─────────────────────────────────────────────
   return (
     <AuthContext.Provider
       value={{
@@ -110,6 +229,7 @@ export const AuthProvider = ({ children }) => {
         updateUser,
         loading,
         isLoggedIn: !!user,
+        api, // expose the configured instance so components use it
       }}
     >
       {children}
@@ -117,6 +237,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// ─────────────────────────────────────────────
+// 10. useAuth hook
+// ─────────────────────────────────────────────
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

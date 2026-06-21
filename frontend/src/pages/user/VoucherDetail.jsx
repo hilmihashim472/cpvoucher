@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { ShieldCheck, Zap, Lock, ShoppingCart } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const REDEMPTION_STEPS = [
   `Add this voucher to your cart.`,
@@ -38,6 +37,7 @@ export default function VoucherDetail() {
 }
 
 function VoucherDetailContent({ id }) {
+  const { api } = useAuth();
   const [voucher, setVoucher] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,8 +45,8 @@ function VoucherDetailContent({ id }) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/vouchers/${id}`)
+    api
+      .get(`/vouchers/${id}`)
       .then((res) => setVoucher(res.data))
       .catch(() => setError("Unable to load this voucher. Please try again later."))
       .finally(() => setLoading(false));
@@ -67,7 +67,7 @@ function VoucherDetailContent({ id }) {
 
     setAddingToCart(true);
     try {
-      await axios.post(`${API_BASE_URL}/cart`, {
+      await api.post("/cart", {
         voucherId: voucher._id,
         quantity: 1,
       });
@@ -87,13 +87,11 @@ function VoucherDetailContent({ id }) {
       <main className="voucher-detail-main">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="voucher-detail-breadcrumb">
-          <Link to="/" className="voucher-detail-breadcrumb-link">
-            Home
+          <Link to="/categories" className="voucher-detail-breadcrumb-link">
+            Category
           </Link>
           {!loading && !error && voucher && (
             <>
-              <span aria-hidden="true">›</span>
-              <span>{voucher.category?.name || "General"}</span>
               <span aria-hidden="true">›</span>
               <span className="voucher-detail-breadcrumb-current">{voucher.storeName ?? voucher.brand}</span>
             </>

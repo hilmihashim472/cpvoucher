@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { Search, Plus, Eye, Pencil, Trash2 } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import InlineError from "../../components/InlineError";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const STATUS_STYLES = {
   active: "vlist-badge-active",
@@ -14,14 +13,15 @@ const STATUS_STYLES = {
 };
 
 export default function VoucherList() {
+  const { api } = useAuth();
   const [search, setSearch] = useState("");
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/vouchers`)
+    api
+      .get("/vouchers")
       .then((res) => {
         setVouchers(Array.isArray(res.data) ? res.data : []);
         setError(null);
@@ -131,7 +131,7 @@ export default function VoucherList() {
                               className="vlist-action-button vlist-action-delete"
                               onClick={() => {
                                 if (window.confirm(`Delete "${v.title}"?`)) {
-                                  axios.delete(`${API_BASE_URL}/vouchers/${v._id}`).then(() => {
+                                  api.delete(`/vouchers/${v._id}`).then(() => {
                                     setVouchers(vouchers.filter(item => item._id !== v._id));
                                     toast.success("Voucher deleted");
                                   }).catch(() => toast.error("Failed to delete"));
