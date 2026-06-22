@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Check, X, Users, ShoppingBag, Ticket, Star } from "lucide-react";
+import { Bell, Users, ShoppingBag, Ticket, Star, Eye } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -37,12 +37,11 @@ export default function SystemOverview() {
     totalUsers: 0,
     activeUsers: 0,
     totalOrders: 0,
-    pendingOrders: 0,
     totalVouchers: 0,
     activeVouchers: 0,
     totalPointsRedeemed: 0,
   });
-  const [pendingOrders, setPendingOrders] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
@@ -50,7 +49,7 @@ export default function SystemOverview() {
       try {
         const { data } = await api.get("/admin/stats");
         setKpis(data.kpis);
-        setPendingOrders(data.pendingOrders);
+        setRecentOrders(data.recentOrders || []);
         setRecentActivity(data.recentActivity);
       } catch (error) {
         toast.error("Failed to load dashboard stats");
@@ -61,20 +60,20 @@ export default function SystemOverview() {
     fetchStats();
   }, [api]);
 
-  const handleDecision = async (id) => {
-    try {
-      // You can add backend logic here to approve/reject orders
-      setPendingOrders((items) => items.filter((item) => item.id !== id));
-      toast.success("Order processed");
-    } catch {
-      toast.error("Failed to process order");
+  const handleViewReceipt = (receiptUrl) => {
+    if (receiptUrl) {
+      window.open(`http://localhost:5000${receiptUrl}`, "_blank");
+    } else {
+      toast.error("Receipt not available");
     }
   };
 
   // Build KPI cards dynamically
+  const totalCompleted = 0;
+  const totalPending = 0;
   const kpiStats = [
     { label: "Total Users", value: kpis.totalUsers, delta: `${kpis.activeUsers} active`, icon: Users },
-    { label: "Total Orders", value: kpis.totalOrders, delta: `${kpis.pendingOrders} pending`, icon: ShoppingBag },
+    { label: "Total Orders", value: kpis.totalOrders, delta: "All time", icon: ShoppingBag },
     { label: "Total Vouchers", value: kpis.totalVouchers, delta: `${kpis.activeVouchers} active`, icon: Ticket },
     { label: "Points Redeemed", value: kpis.totalPointsRedeemed.toLocaleString(), delta: "All time", icon: Star },
   ];
@@ -125,16 +124,16 @@ export default function SystemOverview() {
         <div className="system-left-column">
           <div className="system-card">
             <div className="system-card-header">
-              <h2 className="system-card-title">Pending Orders</h2>
+              <h2 className="system-card-title">Recent Orders</h2>
               <a href="/admin/orders" className="system-view-all-link">
                 View All
               </a>
             </div>
             <ul className="system-merchant-list">
-              {pendingOrders.length === 0 && (
-                <li className="system-merchant-empty">No pending orders. All caught up!</li>
+              {recentOrders.length === 0 && (
+                <li className="system-merchant-empty">No orders yet.</li>
               )}
-              {pendingOrders.map((order) => (
+              {recentOrders.map((order) => (
                 <li key={order.id} className="system-merchant-item">
                   <div className="system-merchant-info">
                     <div className="system-merchant-avatar" aria-hidden="true">
@@ -143,26 +142,24 @@ export default function SystemOverview() {
                     <div className="system-merchant-details">
                       <p className="system-merchant-name">{order.user}</p>
                       <p className="system-merchant-deal">
-                        {order.voucher} · {order.points} pts
+                        {order.voucher} · {order.points.toLocaleString()} pts
                       </p>
+                      {order.orderNumber && (
+                        <p className="text-xs text-gray-400 font-mono mt-1">
+                          {order.orderNumber}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="system-merchant-actions">
                     <button
                       type="button"
-                      aria-label={`Cancel order from ${order.user}`}
-                      onClick={() => handleDecision(order.id)}
-                      className="system-reject-button"
-                    >
-                      <X className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Fulfil order from ${order.user}`}
-                      onClick={() => handleDecision(order.id)}
+                      aria-label={`View receipt for order ${order.orderNumber || order.id}`}
+                      onClick={() => handleViewReceipt(order.receiptUrl)}
                       className="system-approve-button"
+                      title="View Receipt"
                     >
-                      <Check className="h-4 w-4" aria-hidden="true" />
+                      <Eye className="h-4 w-4" aria-hidden="true" />
                     </button>
                   </div>
                 </li>

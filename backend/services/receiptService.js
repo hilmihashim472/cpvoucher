@@ -260,6 +260,7 @@ const generateReceiptHTML = (orderData, user) => {
           <th class="text-right">Qty</th>
           <th class="text-right">Price</th>
           <th class="text-right">Amount</th>
+          <th>Voucher Code</th>
         </tr>
       </thead>
       <tbody>
@@ -272,6 +273,7 @@ const generateReceiptHTML = (orderData, user) => {
             <td class="text-right">${item.quantity}</td>
             <td class="text-right">${item.voucher.points?.toLocaleString()} pts</td>
             <td class="text-right" style="font-weight: 600;">${(item.voucher.points * item.quantity).toLocaleString()} pts</td>
+            <td style="font-weight: 600; color: var(--primary); font-family: monospace; font-size: 14px;">${item.voucher.code}</td>
           </tr>
         `).join("")}
       </tbody>

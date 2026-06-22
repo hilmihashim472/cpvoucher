@@ -1,5 +1,6 @@
 const Category = require("../models/Category");
 const Voucher = require("../models/Voucher");
+const { generateCategoryDescription } = require("../services/gemini");
 
 // Get all categories with voucher count, pagination, search, and filtering
 exports.getCategories = async (req, res) => {
@@ -31,10 +32,16 @@ exports.getCategories = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    // Count vouchers for each category using the correct field name: category_id
+    // Count vouchers for each category (only active, non-expired, available vouchers)
     const categoriesWithCount = await Promise.all(
       categories.map(async (cat) => {
-        const voucherCount = await Voucher.countDocuments({ category_id: cat._id });
+        const now = new Date();
+        const voucherCount = await Voucher.countDocuments({
+          category_id: cat._id,
+          status: "active",
+          expiresAt: { $gte: now },
+          $expr: { $lt: ["$usageCount", "$quantity"] },
+        });
         return { ...cat.toObject(), voucherCount };
       })
     );
@@ -139,6 +146,24 @@ exports.deleteCategory = async (req, res) => {
     res.json({ message: "Category deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Generate category description using AI
+exports.generateCategoryDescription = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Category name is required" });
+    }
+
+    const description = await generateCategoryDescription(name);
+
+    res.status(200).json({ description });
+  } catch (err) {
+    console.error("Generate category description error:", err);
+    res.status(500).json({ message: err.message || "Failed to generate description" });
   }
 };
 

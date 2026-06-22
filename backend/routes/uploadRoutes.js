@@ -1,6 +1,6 @@
 const express = require("express");
 const { uploadProfilePicture } = require("../controllers/uploadController");
-const { upload, handleUploadError } = require("../middleware/upload");
+const { profileUpload, handleUploadError } = require("../middleware/upload");
 const authenticate = require("../middleware/auth");
 
 const router = express.Router();
@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
   "/profile-picture",
   authenticate,
-  upload.single("profilePicture"),
+  profileUpload.single("profilePicture"),
   handleUploadError,
   uploadProfilePicture
 );

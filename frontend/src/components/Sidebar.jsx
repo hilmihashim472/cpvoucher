@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
   { label: "Categories", icon: Tag, to: "/admin/categories" },
   { label: "Vouchers", icon: Ticket, to: "/admin/vouchers" },
-  { label: "Orders", icon: ShoppingBag, to: "/admin/orders" },
+  { label: "Order History", icon: ShoppingBag, to: "/admin/orders" },
   { label: "Users", icon: Users, to: "/admin/users" },
 ];
 

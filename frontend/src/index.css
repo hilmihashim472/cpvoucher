@@ -1783,6 +1783,27 @@ body {
 }
 
 /* ===== pages/user/Categories.jsx ===== */
+.cat-grid-wrapper {
+  @apply overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+}
+.cat-vouchers-section {
+  @apply mt-10;
+}
+.cat-vouchers-header {
+  @apply flex items-end justify-between gap-4;
+}
+.cat-vouchers-title {
+  @apply text-xl font-bold text-ink;
+}
+.cat-vouchers-subtitle {
+  @apply mt-0.5 text-sm text-muted;
+}
+.cat-vouchers-grid {
+  @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3;
+}
+.cat-full-width {
+  @apply sm:col-span-2 lg:col-span-3;
+}
 .cat-hero {
   @apply bg-navy;
 }
@@ -1799,26 +1820,41 @@ body {
   @apply mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8;
 }
 .cat-grid {
-  @apply grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6;
+  @apply flex gap-4 overflow-x-auto scroll-smooth pb-2;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+
+.cat-grid::-webkit-scrollbar {
+  display: none;
+}
+
 .cat-card {
-  @apply flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-line bg-white p-5 text-center transition-all;
+  @apply flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-line bg-white p-5 text-center transition-all flex-shrink-0 w-40;
+  scroll-snap-align: start;
 }
+
 .cat-card:hover {
   @apply border-primary/30 shadow-md;
 }
+
 .cat-card-active {
   @apply border-primary bg-primary/5 shadow-md;
 }
+
 .cat-card-icon {
   @apply flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary;
 }
+
 .cat-card-icon-active {
   @apply bg-primary text-white;
 }
+
 .cat-card-name {
   @apply text-sm font-semibold text-ink;
 }
+
 .cat-card-count {
   @apply text-xs text-muted;
 }
@@ -1852,31 +1888,39 @@ body {
 }
 
 .cat-pagination {
-  @apply mt-8 flex items-center justify-center gap-2;
+  @apply mt-8 flex items-center justify-center gap-3;
 }
 .cat-pagination-button {
-  @apply rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink transition-colors;
+  @apply flex items-center gap-2 rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5;
 }
 .cat-pagination-button:hover:not(:disabled) {
-  @apply bg-surface;
+  @apply border-primary/30 bg-primary/5 text-primary;
 }
 .cat-pagination-button:disabled {
-  @apply cursor-not-allowed opacity-40;
+  @apply cursor-not-allowed border-line bg-white text-muted opacity-50;
 }
 .cat-pagination-pages {
-  @apply flex items-center gap-1;
+  @apply flex items-center gap-1.5;
 }
 .cat-pagination-page {
-  @apply flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors;
+  @apply flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all;
 }
 .cat-pagination-active {
-  @apply bg-primary text-white;
+  @apply bg-primary text-white shadow-sm shadow-primary/20;
 }
 .cat-pagination-inactive {
-  @apply text-muted;
+  @apply text-muted hover:bg-surface hover:text-ink;
 }
 .cat-pagination-inactive:hover {
   @apply bg-surface text-ink;
+}
+
+/* Ensure pagination stays at bottom of section */
+.cat-vouchers-section {
+  @apply mt-10 flex flex-col;
+}
+.cat-vouchers-grid {
+  @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 flex-1;
 }
 
 /* ===== pages/user/ProfileUser.jsx ===== */

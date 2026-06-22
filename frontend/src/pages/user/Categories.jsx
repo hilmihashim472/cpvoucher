@@ -59,6 +59,7 @@ export default function Categories() {
   const [activeCategory, setActiveCategory] = useState("All Deals");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const [vouchers, setVouchers] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -81,7 +82,7 @@ export default function Categories() {
 
         if (activeCategories.length > 0) {
           const dynamicCategories = activeCategories.map((cat) => ({
-            key: cat.name,
+            key: cat.slug,
             label: cat.name,
             icon: ICON_MAP[cat.icon] || Tag,
             color: cat.color || "#F97316", // Use color from database
@@ -107,12 +108,13 @@ export default function Categories() {
       });
   }, [api]);
 
-  const fetchVouchers = useCallback((category, sortVal, pageNum) => {
+  const fetchVouchers = useCallback((category, sortVal, pageNum, search = "") => {
     setLoading(true);
     const params = {};
     if (category && category !== "All Deals") params.category = category;
     if (sortVal) params.sort = sortVal;
     if (pageNum > 1) params.page = pageNum;
+    if (search) params.search = search;
     params.limit = 9;
 
     api
@@ -144,11 +146,13 @@ export default function Categories() {
     const categoryFromUrl = searchParams.get("category") || "All Deals";
     const sortFromUrl = searchParams.get("sort") || "newest";
     const pageFromUrl = parseInt(searchParams.get("page")) || 1;
+    const searchFromUrl = searchParams.get("search") || "";
 
     setActiveCategory(categoryFromUrl);
     setSort(sortFromUrl);
     setPage(pageFromUrl);
-    fetchVouchers(categoryFromUrl, sortFromUrl, pageFromUrl);
+    setSearchQuery(searchFromUrl);
+    fetchVouchers(categoryFromUrl, sortFromUrl, pageFromUrl, searchFromUrl);
   }, [searchParams, fetchVouchers]);
 
   const handleCategoryChange = (category) => {
@@ -159,6 +163,7 @@ export default function Categories() {
       newParams.set("category", category);
     }
     newParams.delete("page");
+    newParams.delete("search");
     setSearchParams(newParams);
   };
 
@@ -199,40 +204,42 @@ export default function Categories() {
 
       <main className="cat-main">
         {/* Category cards */}
-        <div className="cat-grid" role="list" aria-label="Voucher categories">
-          {categories.map(({ key, icon: Icon, label, color }) => {
-            const isActive = activeCategory === key;
-            const count = categoryCounts[key];
-            return (
-              <button
-                key={key}
-                type="button"
-                role="listitem"
-                aria-pressed={isActive}
-                onClick={() => handleCategoryChange(key)}
-                className={`cat-card ${isActive ? "cat-card-active" : ""}`}
-                style={{
-                  '--category-color': color,
-                  '--category-color-light': `${color}15`,
-                  '--category-color-border': `${color}40`,
-                }}
-              >
-                <div
-                  className={`cat-card-icon ${isActive ? "cat-card-icon-active" : ""}`}
+        <div className="cat-grid-wrapper">
+          <div className="cat-grid" role="list" aria-label="Voucher categories">
+            {categories.map(({ key, icon: Icon, label, color }) => {
+              const isActive = activeCategory === key;
+              const count = categoryCounts[key];
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="listitem"
+                  aria-pressed={isActive}
+                  onClick={() => handleCategoryChange(key)}
+                  className={`cat-card ${isActive ? "cat-card-active" : ""}`}
                   style={{
-                    backgroundColor: isActive ? `${color}20` : `${color}10`,
-                    color: color,
+                    '--category-color': color,
+                    '--category-color-light': `${color}15`,
+                    '--category-color-border': `${color}40`,
                   }}
                 >
-                  <Icon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <p className="cat-card-name">{label}</p>
-                <p className="cat-card-count">
-                  {typeof count === "number" ? `${count} vouchers` : "—"}
-                </p>
-              </button>
-            );
-          })}
+                  <div
+                    className={`cat-card-icon ${isActive ? "cat-card-icon-active" : ""}`}
+                    style={{
+                      backgroundColor: isActive ? `${color}20` : `${color}10`,
+                      color: color,
+                    }}
+                  >
+                    <Icon className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <p className="cat-card-name">{label}</p>
+                  <p className="cat-card-count">
+                    {typeof count === "number" ? `${count} vouchers` : "0 voucher"}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Vouchers section */}
@@ -290,8 +297,8 @@ export default function Categories() {
                   key={voucher._id ?? voucher.id}
                   brand={voucher.brand}
                   category={voucher.category_id?.name}
-                  categoryIcon={voucher.category_id?.icon}      
-                  categoryColor={voucher.category_id?.color}    
+                  categoryIcon={voucher.category_id?.icon}
+                  categoryColor={voucher.category_id?.color}
                   title={voucher.title}
                   description={voucher.description}
                   cost={voucher.points}
@@ -301,44 +308,44 @@ export default function Categories() {
                   }
                 />
               ))}
-
-            {/* Pagination */}
-            {!loading && !error && pagination.totalPages > 1 && (
-              <div className="cat-pagination">
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 1}
-                  className="cat-pagination-button"
-                >
-                  Previous
-                </button>
-                <div className="cat-pagination-pages">
-                  {Array.from(
-                    { length: pagination.totalPages },
-                    (_, i) => i + 1,
-                  ).map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      type="button"
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`cat-pagination-page ${pageNum === page ? "cat-pagination-active" : "cat-pagination-inactive"}`}
-                    >
-                      {pageNum}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page === pagination.totalPages}
-                  className="cat-pagination-button"
-                >
-                  Next
-                </button>
-              </div>
-            )}
           </div>
+
+          {/* Pagination */}
+          {!loading && !error && pagination.totalPages > 1 && (
+            <div className="cat-pagination">
+              <button
+                type="button"
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 1}
+                className="cat-pagination-button"
+              >
+                Previous
+              </button>
+              <div className="cat-pagination-pages">
+                {Array.from(
+                  { length: pagination.totalPages },
+                  (_, i) => i + 1,
+                ).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`cat-pagination-page ${pageNum === page ? "cat-pagination-active" : "cat-pagination-inactive"}`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page === pagination.totalPages}
+                className="cat-pagination-button"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </main>
 

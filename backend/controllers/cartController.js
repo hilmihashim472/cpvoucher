@@ -36,14 +36,36 @@ const redeemVouchers = async (req, res) => {
       return res.status(400).json({ message: "Insufficient points balance" });
     }
 
-    // 4. Generate unique order number
+    // 4. Validate voucher quantities
+    for (const item of cartItems) {
+      const voucher = item.voucher;
+      if (!voucher) {
+        return res.status(400).json({ message: `Voucher not found for cart item` });
+      }
+      
+      const availableQuantity = voucher.quantity - voucher.usageCount;
+      if (item.quantity > availableQuantity) {
+        return res.status(400).json({ 
+          message: `Insufficient quantity for "${voucher.title}". Available: ${availableQuantity}, Requested: ${item.quantity}` 
+        });
+      }
+    }
+
+    // 5. Generate unique order number
     const orderNumber = `ORD-${Date.now()}-${userId.toString().slice(-6).toUpperCase()}`;
 
-    // 5. Deduct points
+    // 6. Deduct points
     user.points -= serverTotalPoints;
     await user.save();
 
-    // 6. Create history records with receipt info
+    // 7. Update voucher usage counts
+    for (const item of cartItems) {
+      await Voucher.findByIdAndUpdate(item.voucher._id, {
+        $inc: { usageCount: item.quantity }
+      });
+    }
+
+    // 8. Create history records with receipt info
     const historyRecords = cartItems.map((item) => ({
       user: userId,
       voucher: item.voucher._id,
@@ -129,6 +151,31 @@ exports.addToCart = async (req, res) => {
         .json({ message: "quantity must be a positive integer" });
     }
 
+    // Check if voucher is still available
+    const now = new Date();
+    if (
+      voucher.status !== "active" ||
+      voucher.expiresAt < now ||
+      voucher.usageCount >= voucher.quantity
+    ) {
+      return res.status(400).json({ message: "This voucher is no longer available" });
+    }
+
+    // Check if requested quantity exceeds available quantity
+    const availableQuantity = voucher.quantity - voucher.usageCount;
+    const existingCartItem = await CartItem.findOne({
+      user: req.userId,
+      voucher: voucherId,
+    });
+    const currentCartQty = existingCartItem ? existingCartItem.quantity : 0;
+    const totalRequestedQty = currentCartQty + qty;
+
+    if (totalRequestedQty > availableQuantity) {
+      return res.status(400).json({ 
+        message: `Only ${availableQuantity} voucher(s) available. You have ${currentCartQty} in your cart.` 
+      });
+    }
+
     let cartItem = await CartItem.findOne({
       user: req.userId,
       voucher: voucherId,
@@ -171,6 +218,17 @@ exports.updateCartItem = async (req, res) => {
 
     if (!cartItem)
       return res.status(404).json({ message: "Cart item not found" });
+
+    // Validate that the updated quantity doesn't exceed available quantity
+    const voucher = cartItem.voucher;
+    if (voucher) {
+      const availableQuantity = voucher.quantity - voucher.usageCount;
+      if (qty > availableQuantity) {
+        return res.status(400).json({ 
+          message: `Only ${availableQuantity} voucher(s) available` 
+        });
+      }
+    }
 
     res.json(cartItem);
   } catch (error) {

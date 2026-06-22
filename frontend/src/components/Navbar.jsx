@@ -90,7 +90,7 @@ export default function Navbar({ variant = "default" }) {
                     if (e.key === "Enter") {
                       e.preventDefault();
                       const query = searchQuery.trim();
-                      navigate(query ? `/home?search=${encodeURIComponent(query)}` : "/home");
+                      navigate(query ? `/categories?search=${encodeURIComponent(query)}` : "/categories");
                     }
                   }}
                   className="navbar-search-input"
