@@ -71,7 +71,7 @@ function VoucherDetailContent({ id }) {
         voucherId: voucher._id,
         quantity: 1,
       });
-      toast.success("Added to cart. Code stays hidden until redemption.");
+      toast.success("Added to cart");
       window.dispatchEvent(new Event("cartUpdated"));
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add to cart");

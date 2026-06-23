@@ -541,33 +541,6 @@ const seedData = async () => {
         orderNumber: `ORD-${Date.now()}-003`,
         timestamp: new Date(now.getTime() - 5 * oneDay),
       },
-      {
-        user: user2._id,
-        voucher: vouchers[10]._id,
-        quantity: 2,
-        pointsUsed: vouchers[10].points * 2,
-        discountAmount: vouchers[10].discountAmount * 2,
-        orderNumber: `ORD-${Date.now()}-004`,
-        timestamp: new Date(now.getTime() - 2 * oneDay),
-      },
-      {
-        user: user3._id,
-        voucher: vouchers[1]._id,
-        quantity: 1,
-        pointsUsed: vouchers[1].points * 1,
-        discountAmount: vouchers[1].discountAmount,
-        orderNumber: `ORD-${Date.now()}-005`,
-        timestamp: new Date(now.getTime() - 10 * oneDay),
-      },
-      {
-        user: user3._id,
-        voucher: vouchers[11]._id,
-        quantity: 1,
-        pointsUsed: vouchers[11].points * 1,
-        discountAmount: vouchers[11].discountAmount,
-        orderNumber: `ORD-${Date.now()}-006`,
-        timestamp: new Date(now.getTime() - 1 * oneDay),
-      },
     ]);
     console.log("Order history created");
 

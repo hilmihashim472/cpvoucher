@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth.jsx";
 const NAV_LINKS = [
   { label: "Home", to: "/home" },
   { label: "Categories", to: "/categories" },
-  { label: "Orders", to: "/orders" },
+  { label: "Orders", to: "/orders-history" },
 ];
 
 const SIMPLE_NAV_LINKS = [

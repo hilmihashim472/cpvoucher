@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const connectDB = require("./config/db");
 const adminRoutes = require('./routes/adminRoutes');
+const orderHistoryRoutes = require("./routes/orderHistoryRoutes");
 
 const app = express();
 
@@ -51,10 +52,11 @@ app.use("/uploads", express.static(uploadsDir));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/vouchers", require("./routes/voucherRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
+app.use("/api/orders", orderHistoryRoutes);
 app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", require("./routes/uploadRoutes")); 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ─────────────────────────────────────────────
 // 6. Health Check Endpoint

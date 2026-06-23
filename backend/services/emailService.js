@@ -1,5 +1,11 @@
 const transporter = require("../config/email");
 
+/**
+ * Sends a redemption receipt email with the generated PDF as an attachment
+ * @param {Object} user - User object (email, fullName, username)
+ * @param {Object} orderData - Order details (orderNumber, items, totalPoints, timestamp)
+ * @param {string} pdfPath - Path to the generated PDF file
+ */
 const sendReceiptEmail = async (user, orderData, pdfPath) => {
   try {
     const { orderNumber } = orderData;
@@ -7,11 +13,11 @@ const sendReceiptEmail = async (user, orderData, pdfPath) => {
     const mailOptions = {
       from: `"VoucherHub" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: `Confirmation: Your redemption #${orderNumber} is complete`,
+      subject: `Redemption Confirmed: #${orderNumber}`,
       html: generateEmailHTML(orderData, user),
       attachments: [
         {
-          filename: `receipt-${orderNumber}.pdf`,
+          filename: `Receipt-${orderNumber}.pdf`,
           path: pdfPath,
         },
       ],
@@ -27,11 +33,22 @@ const sendReceiptEmail = async (user, orderData, pdfPath) => {
   }
 };
 
+/**
+ * Modern SaaS-style Email Template
+ * Designed for maximum compatibility (Gmail, Outlook, Apple Mail)
+ */
 const generateEmailHTML = (orderData, user) => {
   const { orderNumber, items, totalPoints, timestamp } = orderData;
+  const date = new Date(timestamp).toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
 
-  // Use system fonts for best compatibility across devices
-  const fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+  const primaryColor = "#6366f1";
+  const textColor = "#1e293b";
+  const mutedColor = "#64748b";
+  const bgColor = "#f8fafc";
 
   return `
 <!DOCTYPE html>
@@ -39,101 +56,115 @@ const generateEmailHTML = (orderData, user) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Confirmation</title>
+  <title>Your Redemption is Confirmed</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: ${fontStack};">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; background-color: ${bgColor}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: ${bgColor}; padding: 40px 10px;">
     <tr>
       <td align="center">
-        <!-- Main Container -->
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-          
-          <!-- Header -->
+        
+        <!-- Email Header -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin-bottom: 24px;">
           <tr>
-            <td style="padding: 40px 40px 20px 40px; text-align: left;">
-              <h1 style="margin: 0; color: #4f46e5; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">VoucherHub.</h1>
+            <td align="left">
+              <div style="color: ${primaryColor}; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">VoucherHub.</div>
+            </td>
+            <td align="right">
+              <span style="font-size: 12px; font-weight: 600; color: #059669; background-color: #ecfdf5; padding: 4px 12px; border-radius: 99px; text-transform: uppercase;">Confirmed</span>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Main Card -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+          
+          <!-- Hero Section -->
+          <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+              <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 700; color: ${textColor};">Redemption Successful.</h1>
+              <p style="margin: 0; font-size: 16px; color: ${mutedColor}; line-height: 1.6;">
+                Hi ${user.fullName || user.username}, your order has been processed. Your digital vouchers are attached to this email as a PDF receipt.
+              </p>
             </td>
           </tr>
 
-          <!-- Body -->
+          <!-- Summary Section -->
           <tr>
             <td style="padding: 0 40px 40px 40px;">
-              <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #0f172a;">Redemption Confirmed</p>
-              <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
-                Hi ${user.fullName || user.username},<br>
-                Great news! Your voucher redemption has been processed successfully. We've attached your official receipt to this email.
-              </p>
-
-              <!-- Order Summary Card -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; border-radius: 12px; padding: 24px; margin-bottom: 30px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 1px solid #f1f5f9; border-radius: 12px; background-color: #ffffff;">
                 <tr>
-                  <td>
+                  <td style="padding: 24px;">
+                    
+                    <!-- Meta Info -->
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
-                        <td style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700; padding-bottom: 8px;">Order Number</td>
-                        <td align="right" style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700; padding-bottom: 8px;">Date</td>
+                        <td style="font-size: 11px; font-weight: 700; color: ${mutedColor}; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 4px;">Order ID</td>
+                        <td align="right" style="font-size: 11px; font-weight: 700; color: ${mutedColor}; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 4px;">Date</td>
                       </tr>
                       <tr>
-                        <td style="font-size: 14px; color: #0f172a; font-weight: 600;">#${orderNumber}</td>
-                        <td align="right" style="font-size: 14px; color: #0f172a; font-weight: 600;">${new Date(timestamp).toLocaleDateString()}</td>
+                        <td style="font-size: 14px; font-weight: 600; color: ${primaryColor}; font-family: 'Courier New', Courier, monospace;">#${orderNumber}</td>
+                        <td align="right" style="font-size: 14px; font-weight: 600; color: ${textColor};">${date}</td>
                       </tr>
                     </table>
 
-                    <div style="margin: 20px 0; border-top: 1px solid #e2e8f0;"></div>
+                    <div style="margin: 20px 0; border-top: 1px solid #f1f5f9;"></div>
 
+                    <!-- Items List -->
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                       ${items.map(item => `
                         <tr>
-                          <td style="padding: 8px 0;">
-                            <div style="font-size: 14px; font-weight: 600; color: #0f172a;">${item.voucher.title}</div>
-                            <div style="font-size: 12px; color: #64748b;">Qty: ${item.quantity}</div>
+                          <td style="padding: 10px 0;">
+                            <div style="font-size: 14px; font-weight: 600; color: ${textColor};">${item.voucher.title}</div>
+                            <div style="font-size: 12px; color: ${mutedColor};">Quantity: ${item.quantity}</div>
                           </td>
-                          <td align="right" style="font-size: 14px; font-weight: 600; color: #0f172a;">
+                          <td align="right" style="font-size: 14px; font-weight: 600; color: ${textColor};">
                             ${(item.voucher.points * item.quantity).toLocaleString()} pts
                           </td>
                         </tr>
                       `).join('')}
+                    </table>
+
+                    <div style="margin: 20px 0; border-top: 2px solid ${textColor};"></div>
+
+                    <!-- Total -->
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
                       <tr>
-                        <td style="padding-top: 20px; font-size: 16px; font-weight: 700; color: #4f46e5;">Total Used</td>
-                        <td align="right" style="padding-top: 20px; font-size: 16px; font-weight: 700; color: #4f46e5;">
-                          ${totalPoints.toLocaleString()} pts
+                        <td style="font-size: 16px; font-weight: 700; color: ${textColor};">Total Points Used</td>
+                        <td align="right" style="font-size: 18px; font-weight: 800; color: ${primaryColor};">
+                          ${totalPoints.toLocaleString()}
                         </td>
                       </tr>
                     </table>
+
                   </td>
                 </tr>
               </table>
+            </td>
+          </tr>
 
-              <!-- Action/Note Box -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+          <!-- CTA / Next Steps -->
+          <tr>
+            <td style="padding: 0 40px 40px 40px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f5f3ff; border-radius: 12px;">
                 <tr>
-                  <td style="padding: 16px;">
-                    <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.5;">
-                      <strong>Next Steps:</strong> Your unique voucher codes will be sent in a separate email shortly. You can also view them anytime in your account under "My Vouchers."
+                  <td style="padding: 20px; text-align: center;">
+                    <p style="margin: 0; font-size: 14px; color: ${primaryColor}; font-weight: 600;">
+                      Your unique codes are also available in "My Vouchers" on our platform.
                     </p>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
-
-          <!-- Footer Text -->
-          <tr>
-            <td style="padding: 0 40px 40px 40px; border-top: 1px solid #f1f5f9;">
-              <p style="margin: 24px 0 0 0; font-size: 12px; color: #94a3b8; text-align: center; line-height: 1.5;">
-                Voucher codes expire 24 hours after redemption if unused.<br>
-                If you didn't authorize this redemption, please contact our security team immediately.
-              </p>
-            </td>
-          </tr>
         </table>
 
-        <!-- Social/Company Footer -->
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; padding-top: 20px;">
+        <!-- Footer -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; padding-top: 30px;">
           <tr>
-            <td align="center" style="font-size: 12px; color: #94a3b8;">
+            <td align="center" style="font-size: 12px; color: ${mutedColor}; line-height: 1.8;">
               &copy; ${new Date().getFullYear()} VoucherHub Inc. All rights reserved.<br>
-              123 Rewards Ave, Digital City, 54321
+              123 Rewards Plaza, Digital Sector, San Francisco, CA 94103<br>
+              <a href="#" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">Support Center</a> &nbsp;&bull;&nbsp; <a href="#" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">Privacy Policy</a>
             </td>
           </tr>
         </table>

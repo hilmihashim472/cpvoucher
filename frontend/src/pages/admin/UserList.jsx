@@ -140,8 +140,8 @@ export default function UserList() {
 
   // Forms
   const [submitting, setSubmitting] = useState(false);
-  const [newUser, setNewUser] = useState({ username: "", email: "", password: "", role: "user", points: 1000 });
-  const [editForm, setEditForm] = useState({ fullName: "", email: "", role: "user", points: 1000 });
+  const [newUser, setNewUser] = useState({ fullName: "", username: "", email: "", password: "", role: "user", points: 2500 });
+  const [editForm, setEditForm] = useState({ fullName: "", username: "", email: "", role: "user", points: 1000 });
 
   /* ── Debounce ── */
   useEffect(() => {
@@ -161,9 +161,15 @@ export default function UserList() {
       const { data } = await api.get(`/admin/users?${params}`);
       setUsers(
         data.users.map((u) => ({
-          id: u._id, name: u.fullName || u.username, email: u.email,
-          username: u.username, fullName: u.fullName, points: u.points,
-          role: u.role, status: u.is_active ? "active" : "suspended",
+          id: u._id, 
+          // ✅ CHANGED: Prioritize username, fallback to fullName
+          name: u.username || u.fullName, 
+          email: u.email,
+          username: u.username, 
+          fullName: u.fullName, 
+          points: u.points,
+          role: u.role, 
+          status: u.is_active ? "active" : "suspended",
           joined: new Date(u.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
           createdAt: u.createdAt,
         }))
@@ -228,7 +234,7 @@ export default function UserList() {
     e.preventDefault(); setSubmitting(true);
     try {
       await api.patch(`/admin/users/${selectedUser.id}`, editForm);
-      setUsers((prev) => prev.map((u) => u.id === selectedUser.id ? { ...u, fullName: editForm.fullName, name: editForm.fullName || u.username, email: editForm.email, role: editForm.role, points: editForm.points } : u));
+      setUsers((prev) => prev.map((u) => u.id === selectedUser.id ? { ...u, fullName: editForm.fullName, username : editForm.username, email: editForm.email, role: editForm.role, points: editForm.points } : u));
       toast.success("User updated!", { icon: "✅" });
       setEditOpen(false);
     } catch (err) { toast.error(err.response?.data?.message || "Failed to update user"); }
@@ -299,11 +305,10 @@ export default function UserList() {
                 <button
                   key={f}
                   onClick={() => setActiveFilter(f)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                    activeFilter === f
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeFilter === f
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   {f}
                 </button>
@@ -378,22 +383,20 @@ export default function UserList() {
                           </td>
                           {/* Role */}
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                              u.role === "admin"
-                                ? "bg-violet-100 text-violet-700"
-                                : "bg-gray-100 text-gray-600"
-                            }`}>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${u.role === "admin"
+                              ? "bg-violet-100 text-violet-700"
+                              : "bg-gray-100 text-gray-600"
+                              }`}>
                               {u.role === "admin" ? <Shield className="h-3 w-3" /> : null}
                               {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                             </span>
                           </td>
                           {/* Status */}
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                              u.status === "active"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : "bg-red-100 text-red-700"
-                            }`}>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${u.status === "active"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-red-100 text-red-700"
+                              }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${u.status === "active" ? "bg-emerald-500" : "bg-red-500"}`} />
                               {u.status.charAt(0).toUpperCase() + u.status.slice(1)}
                             </span>
@@ -407,7 +410,7 @@ export default function UserList() {
                                 className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="View">
                                 <Eye className="h-4 w-4" />
                               </button>
-                              <button onClick={() => { setSelectedUser(u); setEditForm({ fullName: u.fullName || "", email: u.email, role: u.role, points: u.points }); setEditOpen(true); }}
+                              <button onClick={() => { setSelectedUser(u); setEditForm({ fullName: u.fullName, username: u.username, email: u.email, role: u.role, points: u.points }); setEditOpen(true); }}
                                 className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors" title="Edit">
                                 <Pencil className="h-4 w-4" />
                               </button>
@@ -447,9 +450,8 @@ export default function UserList() {
                     else page = pagination.page - 2 + i;
                     return (
                       <button key={page} onClick={() => setPagination((p) => ({ ...p, page }))}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-                          page === pagination.page ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"
-                        }`}>
+                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${page === pagination.page ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"
+                          }`}>
                         {page}
                       </button>
                     );
@@ -471,6 +473,16 @@ export default function UserList() {
         {/* ── CREATE ── */}
         <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Invite New User">
           <form onSubmit={handleCreate} className="space-y-4">
+            <FormField label="Full Name">
+              <input
+                type="text"
+                required
+                value={newUser.fullName}
+                onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                className={inputClass}
+                placeholder="John Doe"
+              />
+            </FormField>
             <FormField label="Username">
               <input type="text" required value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} className={inputClass} placeholder="johndoe" />
             </FormField>
@@ -510,7 +522,7 @@ export default function UserList() {
                   {selectedUser.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{selectedUser.name}</h3>
+                  <h3 className="text-lg font-bold text-gray-900">{selectedUser.fullName || "N/A"}</h3>
                   <p className="text-sm text-gray-500">@{selectedUser.username}</p>
                 </div>
               </div>
@@ -542,7 +554,15 @@ export default function UserList() {
         <Modal isOpen={editOpen} onClose={() => setEditOpen(false)} title="Edit User">
           <form onSubmit={handleUpdate} className="space-y-4">
             <FormField label="Full Name">
-              <input type="text" value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} className={inputClass} placeholder="John Doe" />
+              <input
+                type="text"
+                value={editForm.fullName}
+                onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                className={inputClass}
+              />
+            </FormField>
+             <FormField label="Username">
+              <input type="text" required value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} className={inputClass}/>
             </FormField>
             <FormField label="Email">
               <input type="email" required value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className={inputClass} />
@@ -578,9 +598,8 @@ export default function UserList() {
         <Modal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)} title="" maxWidth="max-w-sm">
           {confirmAction && (
             <div className="text-center space-y-4">
-              <div className={`mx-auto w-14 h-14 rounded-2xl flex items-center justify-center ${
-                confirmAction.type === "suspend" ? "bg-red-100" : "bg-emerald-100"
-              }`}>
+              <div className={`mx-auto w-14 h-14 rounded-2xl flex items-center justify-center ${confirmAction.type === "suspend" ? "bg-red-100" : "bg-emerald-100"
+                }`}>
                 {confirmAction.type === "suspend"
                   ? <ShieldAlert className="h-7 w-7 text-red-600" />
                   : <CheckCircle2 className="h-7 w-7 text-emerald-600" />
@@ -599,11 +618,10 @@ export default function UserList() {
                 <button onClick={() => setConfirmOpen(false)} className="flex-1 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
                   Cancel
                 </button>
-                <button onClick={executeConfirm} className={`flex-1 py-2.5 text-sm font-medium text-white rounded-xl transition-colors shadow-lg ${
-                  confirmAction.type === "suspend"
-                    ? "bg-red-600 hover:bg-red-700 shadow-red-600/25"
-                    : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
-                }`}>
+                <button onClick={executeConfirm} className={`flex-1 py-2.5 text-sm font-medium text-white rounded-xl transition-colors shadow-lg ${confirmAction.type === "suspend"
+                  ? "bg-red-600 hover:bg-red-700 shadow-red-600/25"
+                  : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+                  }`}>
                   {confirmAction.type === "suspend" ? "Suspend" : "Reactivate"}
                 </button>
               </div>

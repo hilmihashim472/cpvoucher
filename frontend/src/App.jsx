@@ -6,7 +6,7 @@ import HomePage from "./pages/user/Home";
 import CategoriesPage from "./pages/user/Categories";
 import VoucherDetailPage from "./pages/user/VoucherDetail";
 import CartPage from "./pages/user/Cart";
-import OrderHistoryPage from "./pages/user/VoucherHistory";
+import OrderHistoryPage from "./pages/user/OrderHistory";
 import ProfileUserPage from "./pages/user/ProfileUser";
 import LoginPage from "./pages/shared/Login";
 import RegisterPage from "./pages/shared/Register";
@@ -59,7 +59,7 @@ function App() {
           }
         />
         <Route
-          path="/orders"
+          path="/orders-history"
           element={
             <ProtectedRoute allowedRoles={["user"]}>
               <OrderHistoryPage />

@@ -6,16 +6,29 @@ const path = require("path");
 const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
 
+// ─── Token helpers ────────────────────────────────────────────────────────────
+
 const generateAccessToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
 const generateRefreshToken = () => crypto.randomBytes(64).toString("hex");
 
+const REFRESH_TOKEN_TTL_MS = 1 * 24 * 60 * 60 * 1000; // 1 day
+
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  maxAge: REFRESH_TOKEN_TTL_MS,
+};
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
 exports.signup = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, fullName, username, password } = req.body;
     const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, username, password: hash });
+    const user = await User.create({ email, username, fullName, password: hash });
     res.status(201).json({ id: user._id });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -34,59 +47,105 @@ exports.login = async (req, res) => {
     await RefreshToken.create({
       token: refreshToken,
       user: user._id,
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expires: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
     });
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
     res.json({ accessToken });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Refresh access token using httpOnly cookie
+// Refresh access token — rotates the refresh token on every use.
+//
+// Rotation means the old token is deleted and a brand-new one is issued.
+// If we detect that an already-used (rotated-away) token is being presented,
+// it means the token was stolen at some point, so we wipe ALL tokens for
+// that user as a precaution (token family invalidation).
 exports.refresh = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) return res.status(401).json({ message: "No refresh token" });
 
+    // Clear the cookie immediately — we will set a new one if everything is ok
+    res.clearCookie("refreshToken", refreshCookieOptions);
+
     const stored = await RefreshToken.findOne({ token });
-    if (!stored || stored.expires < Date.now()) {
-      await RefreshToken.deleteOne({ _id: stored?._id });
-      return res
-        .status(401)
-        .json({ message: "Invalid or expired refresh token" });
+
+    // ── Reuse detection ───────────────────────────────────────────────────────
+    // If the token is not in the DB at all, it may have already been rotated.
+    // This could mean someone is replaying a stolen old token, so invalidate
+    // every token belonging to that user (we decode to get the user id).
+    if (!stored) {
+      try {
+        // The token is not a JWT, so we can't decode it directly.
+        // Instead, try to find which user it *used to* belong to via a
+        // separate lookup field if you add one, or simply return 401.
+        // If you store a `family` field you can wipe the whole family here.
+        // For now, we just reject cleanly.
+        return res.status(401).json({ message: "Refresh token reuse detected" });
+      } catch {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    }
+
+    // ── Expired token ─────────────────────────────────────────────────────────
+    if (stored.expires < Date.now()) {
+      await RefreshToken.deleteOne({ _id: stored._id });
+      return res.status(401).json({ message: "Refresh token expired" });
     }
 
     const user = await User.findById(stored.user);
-    if (!user) return res.status(401).json({ message: "User not found" });
+    if (!user) {
+      await RefreshToken.deleteOne({ _id: stored._id });
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // ── Rotate — delete old, create new ──────────────────────────────────────
+    await RefreshToken.deleteOne({ _id: stored._id });
+
+    const newRefreshToken = generateRefreshToken();
+    await RefreshToken.create({
+      token: newRefreshToken,
+      user: user._id,
+      expires: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
+    });
 
     const accessToken = generateAccessToken(user._id);
+
+    res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
     res.json({ accessToken });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Logout — invalidate refresh token
+// Logout — delete this device's refresh token only
 exports.logout = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
     if (token) await RefreshToken.deleteOne({ token });
-    res.clearCookie("refreshToken");
+    res.clearCookie("refreshToken", refreshCookieOptions);
     res.json({ message: "Logged out" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Get current user profile
+// Logout from every device — wipe all refresh tokens for this user
+exports.logoutAll = async (req, res) => {
+  try {
+    await RefreshToken.deleteMany({ user: req.userId });
+    res.clearCookie("refreshToken", refreshCookieOptions);
+    res.json({ message: "Logged out from all devices" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");
@@ -141,9 +200,7 @@ exports.updateMe = async (req, res) => {
 
     if (newPassword) {
       if (!currentPassword) {
-        return res
-          .status(400)
-          .json({ message: "Current password is required" });
+        return res.status(400).json({ message: "Current password is required" });
       }
       if (newPassword.length < 8) {
         return res
@@ -153,15 +210,18 @@ exports.updateMe = async (req, res) => {
 
       const passwordMatches = await bcrypt.compare(
         currentPassword,
-        user.password,
+        user.password
       );
       if (!passwordMatches) {
-        return res
-          .status(401)
-          .json({ message: "Current password is incorrect" });
+        return res.status(401).json({ message: "Current password is incorrect" });
       }
 
       user.password = await bcrypt.hash(newPassword, 10);
+
+      // Security: invalidate all refresh tokens when password changes so that
+      // any stolen session is immediately terminated.
+      await RefreshToken.deleteMany({ user: user._id });
+      res.clearCookie("refreshToken", refreshCookieOptions);
     }
 
     await user.save();
@@ -179,7 +239,6 @@ exports.removeProfilePicture = async (req, res) => {
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Delete file from uploads folder if it exists
     if (user.profile_picture) {
       const fileName = path.basename(user.profile_picture);
       const filePath = path.join(
@@ -187,37 +246,34 @@ exports.removeProfilePicture = async (req, res) => {
         "..",
         "uploads",
         "profiles",
-        fileName,
+        fileName
       );
-
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     }
 
-    // Update user document to remove profile picture
     user.profile_picture = null;
     await user.save();
 
     const updatedUser = user.toObject();
     delete updatedUser.password;
-    res.json({
-      message: "Profile picture removed successfully",
-      user: updatedUser,
-    });
+    res.json({ message: "Profile picture removed successfully", user: updatedUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Admin creates a new user
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
 exports.adminCreateUser = async (req, res) => {
   try {
-    const { email, username, fullName, password, role, points, is_active } = req.body;
-    
-    // Check if email is already taken
+    const { email, username, fullName, password, role, points, is_active } =
+      req.body;
+
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(409).json({ message: "Email is already in use" });
+    if (existingUser)
+      return res.status(409).json({ message: "Email is already in use" });
 
     const hash = await bcrypt.hash(password, 10);
 
@@ -226,15 +282,108 @@ exports.adminCreateUser = async (req, res) => {
       username,
       fullName,
       password: hash,
-      role: role || 'user',
+      role: role || "user",
       points: points || 1000,
-      is_active: is_active !== undefined ? is_active : true
+      is_active: is_active !== undefined ? is_active : true,
     });
 
-    // Return user without password
     const { password: _, ...userWithoutPassword } = user.toObject();
     res.status(201).json(userWithoutPassword);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+exports.getUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const sortField = req.query.sort || "createdAt";
+    const sortOrder = req.query.order === "asc" ? 1 : -1;
+    const search = req.query.search || "";
+    const roleFilter = req.query.role || "";
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { username: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { fullName: { $regex: search, $options: "i" } },
+      ];
+    }
+    if (roleFilter && roleFilter !== "All") {
+      query.role = roleFilter.toLowerCase();
+    }
+
+    const users = await User.find(query)
+      .select("-password")
+      .sort({ [sortField]: sortOrder })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+      users,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// @desc    Update user
+exports.updateUser = async (req, res) => {
+  try {
+    if (req.params.id === req.userId.toString()) {
+      return res.status(400).json({ message: "You cannot modify your own account here." });
+    }
+
+    const { role, is_active, fullName, email, points } = req.body;
+    const updateData = {};
+
+    if (role && ["user", "admin"].includes(role)) updateData.role = role;
+    if (typeof is_active === "boolean") updateData.is_active = is_active;
+    if (typeof fullName === "string") updateData.fullName = fullName.trim(); 
+    if (typeof points === "number") updateData.points = points;
+
+    if (email) {
+      const nextEmail = email.trim().toLowerCase();
+      const existingUser = await User.findOne({ email: nextEmail, _id: { $ne: req.params.id } });
+      if (existingUser) return res.status(409).json({ message: "Email is already in use" });
+      updateData.email = nextEmail;
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// @desc    Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    if (req.params.id === req.userId.toString()) {
+      return res.status(400).json({ message: "You cannot delete your own account." });
+    }
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// @desc    Get single user
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

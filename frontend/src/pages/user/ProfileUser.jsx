@@ -529,7 +529,7 @@ export default function ProfileUser() {
           <div className="profile-orders-card">
             <div className="profile-orders-header">
               <span className="profile-orders-title">Last 3 redemptions</span>
-              <Link to="/orders" className="profile-orders-link">
+              <Link to="/orders-history" className="profile-orders-link">
                 View all orders →
               </Link>
             </div>

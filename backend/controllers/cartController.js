@@ -253,16 +253,4 @@ exports.removeCartItem = async (req, res) => {
   }
 };
 
-// Fetch the redemption history for the user
-exports.getOrderHistory = async (req, res) => {
-  try {
-    const history = await CartItemHistory.find({ user: req.userId })
-      .populate("voucher")
-      .sort("-timestamp");
-    res.json(history);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 exports.redeemVouchers = redeemVouchers;

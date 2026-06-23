@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     fullName: { type: String, default: "" },
     password: { type: String, required: true },
     is_active: { type: Boolean, default: true },
-    points: { type: Number, default: 1000 },
+    points: { type: Number, default: 2500 },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     profile_picture: { type: String, default: null }
   },

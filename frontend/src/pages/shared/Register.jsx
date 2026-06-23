@@ -13,6 +13,8 @@ const FEATURES = [
 function validate(form, agreed) {
   const errors = {};
   if (!form.name.trim()) errors.name = "Full name is required.";
+  if (!form.username.trim()) errors.username = "Username is required.";
+  else if (form.username.length < 3) errors.username = "Username must be at least 3 characters.";
   if (!form.email) errors.email = "Email is required.";
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
     errors.email = "Enter a valid email address.";
@@ -31,6 +33,7 @@ export default function Register() {
   const { register } = useAuth();
   const [form, setForm] = useState({
     name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -61,7 +64,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      const result = await register(form.name, form.email, form.password);
+      const result = await register(form.name, form.username, form.email, form.password);
       if (result.success) {
         toast.success("Account created! Welcome to VoucherHub.");
         navigate("/home");
@@ -131,6 +134,26 @@ export default function Register() {
                 />
               </div>
               {errors.name && <p className="auth-error-text">{errors.name}</p>}
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="reg-username" className="auth-label">
+                Username
+              </label>
+              <div className="auth-input-wrapper">
+                <User className="auth-input-icon" aria-hidden="true" />
+                <input
+                  id="reg-username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="e.g. alexchan99"
+                  value={form.username}
+                  onChange={handleChange}
+                  className={`auth-input ${errors.username ? "auth-input-error" : ""}`}
+                />
+              </div>
+              {errors.username && <p className="auth-error-text">{errors.username}</p>}
             </div>
 
             {/* Email */}

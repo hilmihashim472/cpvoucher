@@ -66,7 +66,6 @@ export const AuthProvider = ({ children }) => {
     email: data.email,
     username: data.username,
     fullName: data.fullName,
-    name: data.fullName || data.username,
     role: data.role,
     points: data.points,
     profilePicture: data.profile_picture,
@@ -179,10 +178,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
+  const register = useCallback(async (name, username, email, password) => {
     try {
       await api.post("/auth/register", {
-        username: name,
+        fullName: name,
+        username,
         email,
         password,
       });
