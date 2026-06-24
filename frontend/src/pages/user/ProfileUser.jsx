@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Camera, ShoppingBag, Ticket, TrendingUp, X } from "lucide-react";
+import { Camera, ShoppingBag, Ticket, TrendingUp, X, LogOut } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useAuth } from "../../hooks/useAuth.jsx";
@@ -12,7 +12,8 @@ const ORDER_BADGE_STYLES = {
 };
 
 export default function ProfileUser() {
-  const { user, updateUser, api } = useAuth();
+  const { user, updateUser, api, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Personal Info State
   const [fullName, setFullName] = useState(user?.fullName || "");
@@ -337,6 +338,17 @@ export default function ProfileUser() {
                   Remove
                 </button>
               )}
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  navigate("/");
+                }}
+                className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
@@ -562,9 +574,11 @@ export default function ProfileUser() {
           </div>
         </div>
 
-        {/* Danger zone */}
+        {/* Account actions */}
         <div className="profile-section">
           <h2 className="profile-section-title">Account</h2>
+
+          {/* Danger zone */}
           <div className="profile-danger-card">
             <p className="profile-danger-title">Delete Account</p>
             <p className="profile-danger-text">
@@ -581,7 +595,7 @@ export default function ProfileUser() {
               Delete My Account
             </button>
           </div>
-        </div>
+        </div> {/* end Account section */}
       </main>
 
       <Footer />

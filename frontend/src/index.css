@@ -321,7 +321,7 @@ body {
   @apply my-2 border-t border-line;
 }
 .navbar-dropdown-item {
-  @apply flex items-center gap-3 px-4 py-2.5 text-sm text-ink transition-colors;
+  @apply flex w-full items-center gap-3 px-4 py-2.5 text-sm text-ink transition-colors;
 }
 .navbar-dropdown-item:hover {
   @apply bg-surface;
@@ -387,6 +387,36 @@ body {
 }
 .navbar-points-text {
   @apply text-sm font-bold text-amber-700 whitespace-nowrap;
+}
+
+/* ===== components/BottomNav.jsx ===== */
+.bnav {
+  @apply fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white lg:hidden;
+}
+.bnav-inner {
+  @apply flex h-16 items-stretch justify-around;
+}
+.bnav-item {
+  @apply flex flex-1 flex-col items-center justify-center gap-1 text-gray-400 transition-colors active:scale-95;
+}
+.bnav-item-active {
+  @apply text-primary;
+}
+.bnav-icon-wrap {
+  @apply relative;
+}
+.bnav-cart-badge {
+  @apply absolute -right-2 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-0.5 text-[9px] font-bold leading-none text-white;
+}
+.bnav-label {
+  @apply text-[10px] font-medium leading-none;
+}
+
+/* push page content above bottom nav on mobile */
+@media (max-width: 1023px) {
+  #root {
+    padding-bottom: 4rem;
+  }
 }
 
 /* ===== components/Sidebar.jsx ===== */
@@ -1397,11 +1427,50 @@ body {
 }
 
 /* ===== pages/admin/Dashboard.jsx ===== */
+/* ===== components/AdminMobileNav.jsx ===== */
+.amnav-topbar {
+  @apply lg:hidden fixed top-0 left-0 right-0 z-30 h-14 bg-white border-b border-gray-100 shadow-sm;
+}
+.amnav-topbar-inner {
+  @apply flex h-full items-center justify-between px-4;
+}
+.amnav-topbar-logo {
+  @apply flex items-center gap-2.5;
+}
+.amnav-topbar-logo-icon {
+  @apply flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow;
+}
+.amnav-topbar-logo-text {
+  @apply text-base font-bold text-gray-900 tracking-tight;
+}
+.amnav-topbar-avatar {
+  @apply flex items-center justify-center rounded-full ring-2 ring-white shadow-sm;
+}
+.amnav-topbar-avatar-img {
+  @apply h-9 w-9 rounded-full object-cover;
+}
+.amnav-topbar-avatar-placeholder {
+  @apply flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white;
+}
+.amnav-bottom {
+  @apply lg:hidden fixed bottom-0 left-0 right-0 z-30 flex h-16 items-stretch bg-white border-t border-gray-100 shadow-[0_-1px_4px_rgba(0,0,0,0.06)];
+}
+.amnav-bottom-item {
+  @apply flex flex-1 flex-col items-center justify-center gap-0.5 text-gray-400 transition-colors;
+}
+.amnav-bottom-item-active {
+  @apply text-blue-600;
+}
+.amnav-bottom-label {
+  @apply text-[10px] font-medium leading-none;
+}
+
+/* ===== admin shell ===== */
 .admin-shell {
   @apply flex min-h-screen bg-surface;
 }
 .admin-content {
-  @apply flex min-w-0 flex-1 flex-col;
+  @apply flex min-w-0 flex-1 flex-col pt-14 pb-16 lg:pt-0 lg:pb-0;
 }
 .admin-main {
   @apply mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 sm:px-6 lg:px-8;
@@ -2193,6 +2262,24 @@ body {
 .auth-footer-link:hover {
   @apply underline;
 }
+.auth-google-button {
+  @apply flex w-full items-center justify-center gap-3 rounded-lg border border-line bg-white py-2.5 text-sm font-semibold text-ink shadow-sm transition-all;
+}
+.auth-google-button:hover {
+  @apply border-gray-300 bg-gray-50;
+}
+.auth-google-button:active {
+  @apply scale-[0.99];
+}
+.auth-divider {
+  @apply my-5 flex items-center gap-4;
+}
+.auth-divider-line {
+  @apply flex-1 border-t border-line;
+}
+.auth-divider-text {
+  @apply shrink-0 text-xs uppercase tracking-wide text-muted;
+}
 
 /* ===== pages/admin/AddVoucher.jsx ===== */
 .vadd-back-link {
@@ -2645,6 +2732,89 @@ body {
 }
 .cadd-preview-empty {
   @apply rounded-xl border border-dashed border-line bg-surface px-4 py-8 text-center text-sm text-muted;
+}
+
+/* ===== pages/admin/ProfileAdmin.jsx ===== */
+.padmin-layout {
+  @apply grid grid-cols-1 gap-6 lg:grid-cols-3;
+}
+.padmin-main-col {
+  @apply space-y-6 lg:col-span-2;
+}
+.padmin-side-col {
+  @apply space-y-4;
+}
+.padmin-banner {
+  @apply relative overflow-hidden rounded-2xl border border-line bg-white p-6;
+}
+.padmin-banner-bg {
+  @apply absolute inset-0 bg-gradient-to-br from-blue-600/5 to-indigo-600/10 pointer-events-none;
+}
+.padmin-avatar-wrap {
+  @apply relative mb-4 w-fit;
+}
+.padmin-avatar {
+  @apply flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-bold text-white shadow-lg ring-4 ring-white;
+}
+.padmin-avatar-img {
+  @apply h-20 w-20 rounded-2xl object-cover ring-4 ring-white shadow-lg;
+}
+.padmin-avatar-upload {
+  @apply absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-white border border-line shadow-sm text-muted transition-colors hover:text-ink;
+}
+.padmin-name {
+  @apply text-xl font-bold text-ink;
+}
+.padmin-email {
+  @apply mt-0.5 text-sm text-muted;
+}
+.padmin-role-badge {
+  @apply mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white;
+}
+.padmin-section {
+  @apply rounded-2xl border border-line bg-white p-6;
+}
+.padmin-section-title {
+  @apply mb-5 text-xs font-bold uppercase tracking-widest text-muted;
+}
+.padmin-grid-2 {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+}
+.padmin-field {
+  @apply flex flex-col gap-1.5;
+}
+.padmin-label {
+  @apply text-xs font-semibold uppercase tracking-wide text-muted;
+}
+.padmin-input {
+  @apply w-full rounded-lg border border-line bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:text-muted;
+}
+.padmin-input-error {
+  @apply border-danger/50 focus:ring-danger/20;
+}
+.padmin-error-text {
+  @apply text-xs text-danger;
+}
+.padmin-save-button {
+  @apply mt-5 flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60;
+}
+.padmin-card {
+  @apply rounded-2xl border border-line bg-white p-5;
+}
+.padmin-card-title {
+  @apply mb-4 text-sm font-bold text-ink;
+}
+.padmin-stat-row {
+  @apply flex items-center justify-between border-b border-line py-3 text-sm last:border-0 last:pb-0;
+}
+.padmin-stat-label {
+  @apply text-muted;
+}
+.padmin-stat-value {
+  @apply font-semibold text-ink;
+}
+.padmin-logout-button {
+  @apply flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50;
 }
 
 /* ===== pages/shared/Landing.jsx ===== */

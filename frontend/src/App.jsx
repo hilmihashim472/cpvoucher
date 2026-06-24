@@ -1,6 +1,15 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
 import { AuthProvider } from "./hooks/useAuth.jsx";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 import LandingPage from "./pages/shared/Landing";
 import HomePage from "./pages/user/Home";
 import CategoriesPage from "./pages/user/Categories";
@@ -18,12 +27,14 @@ import UserListPage from "./pages/admin/UserList";
 import OrderListPage from "./pages/admin/OrderList";
 import CategoryListPage from "./pages/admin/CategoryList";
 import AddCategoryPage from "./pages/admin/AddCategory";
+import ProfileAdminPage from "./pages/admin/ProfileAdmin";
 import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Toaster position="top-right" />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -131,6 +142,14 @@ function App() {
           element={
             <AdminRoute>
               <AddCategoryPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/profile"
+          element={
+            <AdminRoute>
+              <ProfileAdminPage />
             </AdminRoute>
           }
         />

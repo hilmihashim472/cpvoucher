@@ -12,6 +12,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth.jsx";
+import AdminMobileNav from "./AdminMobileNav";
 
 /* ──────────────────────────────────────────────
    NAVIGATION — arranged by logical flow:
@@ -73,11 +74,14 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── MOBILE HAMBURGER BUTTON ── */}
+      {/* Mobile top + bottom nav (replaces hamburger on small screens) */}
+      <AdminMobileNav />
+
+      {/* ── MOBILE HAMBURGER BUTTON — desktop fallback only ── */}
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+        className="hidden fixed top-4 left-4 z-40 p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5 text-gray-700" />
@@ -138,13 +142,13 @@ export default function Sidebar() {
               <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
               <p className="text-xs text-gray-500 truncate">{displayEmail}</p>
             </div>
-            <button
-              type="button"
+            <Link
+              to="/admin/profile"
               className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-white transition-colors"
-              aria-label="Settings"
+              aria-label="Profile settings"
             >
               <Settings className="h-4 w-4" />
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -192,6 +196,8 @@ export default function Sidebar() {
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
       `}</style>
+
+      {/* Hide desktop sidebar on mobile (AdminMobileNav handles mobile nav) */}
     </>
   );
 }
