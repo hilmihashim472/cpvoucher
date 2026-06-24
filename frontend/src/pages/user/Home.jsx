@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { Search, Copy, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import CategoryPill from "../../components/CategoryPill";
 import VoucherCard from "../../components/VoucherCard";
 import SkeletonCard from "../../components/SkeletonCard";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
-import API_BASE_URL from "../../config/api";
-
-const CATEGORIES = ["All Deals", "Food", "Tech", "Travel", "Fashion", "Home"];
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURED_PARTNERS = [
   { name: "Starbucks", code: "SBUX-FREE-50", remaining: 120, total: 500 },
@@ -19,17 +15,22 @@ const FEATURED_PARTNERS = [
 ];
 
 export default function Home() {
+  const { api } = useAuth();
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState("All Deals");
-  const [searchQuery, setSearchQuery] = useState("");
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copiedCode, setCopiedCode] = useState(null);
 
-  const fetchVouchers = useCallback((params) => {
-    axios
-      .get(`${API_BASE_URL}/vouchers`, { params })
+  const fetchVouchers = useCallback(() => {
+    setLoading(true);
+    api
+      .get("/vouchers", {
+        params: {
+          sort: "popular",
+          limit: 6,
+        },
+      })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : res.data?.vouchers ?? [];
         setVouchers(data);
@@ -39,22 +40,11 @@ export default function Home() {
         setError("Unable to load vouchers right now. Please try again later.");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [api]);
 
   useEffect(() => {
-    fetchVouchers({ category: activeCategory });
-  }, [activeCategory, fetchVouchers]);
-
-  const handleCategoryChange = (category) => {
-    setLoading(true);
-    setActiveCategory(category);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    fetchVouchers({ category: activeCategory, search: searchQuery });
-  };
+    fetchVouchers();
+  }, [fetchVouchers]);
 
   const handleCopyCode = (code) => {
     navigator.clipboard?.writeText(code);
@@ -75,37 +65,7 @@ export default function Home() {
               Redeem your reward points for exclusive vouchers from hundreds of
               top brands across food, tech, travel, fashion, and more.
             </p>
-            <form onSubmit={handleSearchSubmit} className="home-hero-form">
-              <label className="home-hero-search-label">
-                <span className="sr-only">Search vouchers</span>
-                <Search className="home-hero-search-icon" aria-hidden="true" />
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search brands, categories, deals..."
-                  className="home-hero-search-input"
-                />
-              </label>
-              <button type="submit" className="home-hero-submit">
-                Find Deals
-              </button>
-            </form>
           </div>
-        </div>
-      </section>
-
-      {/* Category filter pills */}
-      <section className="home-categories">
-        <div className="home-categories-row scrollbar-hide">
-          {CATEGORIES.map((category) => (
-            <CategoryPill
-              key={category}
-              label={category}
-              active={activeCategory === category}
-              onClick={() => handleCategoryChange(category)}
-            />
-          ))}
         </div>
       </section>
 
@@ -118,7 +78,7 @@ export default function Home() {
               Curated deals based on your recent activity.
             </p>
           </div>
-          <button type="button" onClick={() => handleCategoryChange("All Deals")} className="home-view-all">
+          <button type="button" onClick={() => navigate("/categories")} className="home-view-all">
             View all →
           </button>
         </div>
@@ -148,13 +108,16 @@ export default function Home() {
               <VoucherCard
                 key={voucher._id ?? voucher.id}
                 brand={voucher.brand}
-                category={voucher.category}
+                category={voucher.category_id?.name}
+                categoryIcon={voucher.category_id?.icon}
+                categoryColor={voucher.category_id?.color}
                 title={voucher.title}
                 description={voucher.description}
-                cost={voucher.cost ?? voucher.points}
-                pointsLabel={voucher.pointsLabel}
+                cost={voucher.points}
                 badge={voucher.badge}
-                onGetCode={() => navigate(`/vouchers/${voucher._id ?? voucher.id}`)}
+                onGetCode={() =>
+                  navigate(`/vouchers/${voucher._id ?? voucher.id}`)
+                }
               />
             ))}
         </div>

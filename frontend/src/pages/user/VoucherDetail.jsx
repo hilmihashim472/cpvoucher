@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
-import { Copy, Check, ExternalLink, ShieldCheck, Zap, Lock } from "lucide-react";
+import toast from "react-hot-toast";
+import { ShieldCheck, Zap, Lock, ShoppingCart } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import InlineError from "../../components/InlineError";
 import EmptyState from "../../components/EmptyState";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const REDEMPTION_STEPS = [
-  `Copy the unique voucher code by clicking the "Copy" button in the sidebar.`,
-  `Navigate to the brand's website through the "Redeem Now" link.`,
-  `Apply the code at checkout in the "Promotional Code" field to receive your discount.`,
+  `Add this voucher to your cart.`,
+  `Redeem it from your cart using your reward points.`,
+  `Receive the voucher code after redemption is complete.`,
 ];
 
 const TRUST_BADGES = [
@@ -37,15 +37,16 @@ export default function VoucherDetail() {
 }
 
 function VoucherDetailContent({ id }) {
+  const { api } = useAuth();
   const [voucher, setVoucher] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [copied, setCopied] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/vouchers/${id}`)
+    api
+      .get(`/vouchers/${id}`)
       .then((res) => setVoucher(res.data))
       .catch(() => setError("Unable to load this voucher. Please try again later."))
       .finally(() => setLoading(false));
@@ -61,27 +62,36 @@ function VoucherDetailContent({ id }) {
     ? getCountdown(voucher.expiresAt, now)
     : { days: 0, hours: 0, minutes: 0 };
 
-  const handleCopy = () => {
-    if (!voucher?.code) return;
-    navigator.clipboard?.writeText(voucher.code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleAddToCart = async () => {
+    if (!voucher?._id || addingToCart) return;
+
+    setAddingToCart(true);
+    try {
+      await api.post("/cart", {
+        voucherId: voucher._id,
+        quantity: 1,
+      });
+      toast.success("Added to cart");
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add to cart");
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   return (
     <div className="page-shell">
-      <Navbar variant="simple" />
+      <Navbar />
 
       <main className="voucher-detail-main">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="voucher-detail-breadcrumb">
-          <Link to="/" className="voucher-detail-breadcrumb-link">
-            Home
+          <Link to="/categories" className="voucher-detail-breadcrumb-link">
+            Category
           </Link>
           {!loading && !error && voucher && (
             <>
-              <span aria-hidden="true">›</span>
-              <span>{voucher.category}</span>
               <span aria-hidden="true">›</span>
               <span className="voucher-detail-breadcrumb-current">{voucher.storeName ?? voucher.brand}</span>
             </>
@@ -121,9 +131,17 @@ function VoucherDetailContent({ id }) {
             {/* Left column (60%) */}
             <div className="voucher-detail-left">
               <div className="voucher-detail-hero-image">
-                <span className="voucher-detail-hero-brand" aria-hidden="true">
-                  {voucher.brand}
-                </span>
+                {voucher.image ? (
+                  <img
+                    src={voucher.image}
+                    alt={voucher.title}
+                    className="voucher-detail-hero-img"
+                  />
+                ) : (
+                  <span className="voucher-detail-hero-brand" aria-hidden="true">
+                    {voucher.brand}
+                  </span>
+                )}
                 <span className="voucher-detail-hero-badge">
                   Expires in {countdown.days} day{countdown.days === 1 ? "" : "s"}
                 </span>
@@ -156,38 +174,21 @@ function VoucherDetailContent({ id }) {
 
                 <div className="voucher-detail-code-section">
                   <p className="voucher-detail-code-label">Voucher Code</p>
-                  <div className="voucher-detail-code-row">
-                    <code className="voucher-detail-code">{voucher.code}</code>
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      aria-label="Copy voucher code"
-                      className="voucher-detail-copy-button"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="h-4 w-4" aria-hidden="true" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" aria-hidden="true" />
-                          Copy
-                        </>
-                      )}
-                    </button>
+                  <div className="voucher-detail-code-hidden">
+                    <Lock className="h-4 w-4" aria-hidden="true" />
+                    <span>Code hidden until redemption</span>
                   </div>
                 </div>
 
-                <a
-                  href={voucher.brandUrl ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
                   className="voucher-detail-redeem-button"
                 >
-                  Redeem Now
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                </a>
+                  <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+                  {addingToCart ? "Adding..." : "Add to Cart"}
+                </button>
 
                 <div className="voucher-detail-countdown-grid">
                   {["days", "hours", "minutes"].map((unit) => (

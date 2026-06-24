@@ -1,9 +1,21 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, User, Check } from "lucide-react";
-import API_BASE_URL from "../../config/api";
+
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+function GoogleIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  );
+}
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURES = [
   "Completely free to join",
@@ -14,6 +26,8 @@ const FEATURES = [
 function validate(form, agreed) {
   const errors = {};
   if (!form.name.trim()) errors.name = "Full name is required.";
+  if (!form.username.trim()) errors.username = "Username is required.";
+  else if (form.username.length < 3) errors.username = "Username must be at least 3 characters.";
   if (!form.email) errors.email = "Email is required.";
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
     errors.email = "Enter a valid email address.";
@@ -29,8 +43,10 @@ function validate(form, agreed) {
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [form, setForm] = useState({
     name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -61,17 +77,13 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/auth/register`, {
-        name: form.name,
-        email: form.email,
-        password: form.password,
-      });
-      toast.success("Account created! Welcome to VoucherHub.");
-      navigate("/");
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ?? "Registration failed. Please try again.";
-      toast.error(msg);
+      const result = await register(form.name, form.username, form.email, form.password);
+      if (result.success) {
+        toast.success("Account created! Welcome to VoucherHub.");
+        navigate("/home");
+      } else {
+        toast.error(result.message || "Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -115,7 +127,24 @@ export default function Register() {
           <h2 className="auth-card-title">Create your account</h2>
           <p className="auth-card-subtitle">It&apos;s free and only takes a minute.</p>
 
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => { window.location.href = `${BACKEND_URL}/api/auth/google`; }}
+              className="auth-google-button"
+            >
+              <GoogleIcon />
+              Sign up with Google
+            </button>
+          </div>
+
+          <div className="auth-divider">
+            <div className="auth-divider-line" />
+            <span className="auth-divider-text">or sign up with email</span>
+            <div className="auth-divider-line" />
+          </div>
+
+          <form className="auth-form !mt-0" onSubmit={handleSubmit} noValidate>
             {/* Full Name */}
             <div className="auth-field">
               <label htmlFor="reg-name" className="auth-label">
@@ -135,6 +164,26 @@ export default function Register() {
                 />
               </div>
               {errors.name && <p className="auth-error-text">{errors.name}</p>}
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="reg-username" className="auth-label">
+                Username
+              </label>
+              <div className="auth-input-wrapper">
+                <User className="auth-input-icon" aria-hidden="true" />
+                <input
+                  id="reg-username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="e.g. alexchan99"
+                  value={form.username}
+                  onChange={handleChange}
+                  className={`auth-input ${errors.username ? "auth-input-error" : ""}`}
+                />
+              </div>
+              {errors.username && <p className="auth-error-text">{errors.username}</p>}
             </div>
 
             {/* Email */}

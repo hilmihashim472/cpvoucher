@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import toast from "react-hot-toast";
 import {
   ArrowLeft, Send, FileText, ChevronDown,
   UtensilsCrossed, ShoppingBag, Laptop, Plane, Sparkles,
   Home as HomeIcon, Dumbbell, Car, BookOpen, Heart,
   Music, Coffee, Gift, Gamepad2, Tag, Zap, Star, Baby,
+  Loader2,
 } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
-import API_BASE_URL from "../../config/api";
+import { useAuth } from "../../hooks/useAuth.jsx";
 
 const ICON_OPTIONS = [
   { name: "UtensilsCrossed", Icon: UtensilsCrossed },
@@ -125,10 +125,12 @@ function LivePreview({ form }) {
 }
 
 export default function AddCategory() {
+  const { api } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, slug: toSlug(prev.name) }));
@@ -138,6 +140,27 @@ export default function AddCategory() {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
+
+  // AI Generate Description
+  const handleGenerateDescription = async () => {
+    if (!form.name) {
+      toast.error("Please enter a category name first");
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const { data } = await api.post("/admin/categories/generate-description", {
+        name: form.name,
+      });
+      setForm((prev) => ({ ...prev, description: data.description }));
+      toast.success("✨ Description generated!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to generate description");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const selectIcon = (iconName) => {
@@ -158,7 +181,7 @@ export default function AddCategory() {
     }
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/admin/categories`, { ...form, status });
+      await api.post("/admin/categories", { ...form, status });
       toast.success(
         status === "active" ? "Category published!" : "Saved as draft."
       );
@@ -235,9 +258,29 @@ export default function AddCategory() {
                   </div>
 
                   <div className="cadd-field">
-                    <label htmlFor="c-description" className="cadd-label">
-                      Description <span className="cadd-required">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label htmlFor="c-description" className="cadd-label mb-0">
+                        Description <span className="cadd-required">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleGenerateDescription}
+                        disabled={generating}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-1.5 text-xs font-semibold text-white hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                      >
+                        {generating ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-3 w-3" />
+                            AI Generate
+                          </>
+                        )}
+                      </button>
+                    </div>
                     <textarea
                       id="c-description"
                       name="description"
@@ -250,6 +293,9 @@ export default function AddCategory() {
                     {errors.description && (
                       <p className="cadd-error-text">{errors.description}</p>
                     )}
+                    <p className="cadd-hint">
+                      💡 Tip: Enter the category name first, then click AI Generate.
+                    </p>
                   </div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { SlidersHorizontal, Download, Plus } from "lucide-react";
 import {
@@ -16,16 +16,9 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import {
-  ANALYTICS_KPIS,
-  REDEMPTION_TRENDS,
-  TOP_VOUCHERS,
-  CATEGORY_DISTRIBUTION,
-  REALTIME_METRICS,
-  PIE_COLORS,
-} from "./mockData";
+import { useAuth } from "../../hooks/useAuth";
 
-const CATEGORY_FILTERS = ["All Categories", "Electronics", "Food & Wine", "Travel"];
+const PIE_COLORS = ["#1A56DB", "#F97316", "#10B981", "#1E293B", "#94A3B8"];
 
 const METRIC_TONE_STYLES = {
   warning: "analytics-metric-fill-warning",
@@ -34,7 +27,39 @@ const METRIC_TONE_STYLES = {
 };
 
 export default function AnalyticsReports() {
-  const [activeFilter, setActiveFilter] = useState("All Categories");
+  const { api } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [kpis, setKpis] = useState([]);
+  const [redemptionTrends, setRedemptionTrends] = useState([]);
+  const [topVouchers, setTopVouchers] = useState([]);
+  const [categoryDistribution, setCategoryDistribution] = useState([]);
+  const [realtimeMetrics, setRealtimeMetrics] = useState([]);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const { data } = await api.get("/admin/analytics");
+        setKpis(data.kpis || []);
+        setRedemptionTrends(data.redemptionTrends || []);
+        setTopVouchers(data.topVouchers || []);
+        setCategoryDistribution(data.categoryDistribution || []);
+        setRealtimeMetrics(data.realtimeMetrics || []);
+      } catch (error) {
+        toast.error("Failed to load analytics data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, [api]);
+
+  if (loading) {
+    return (
+      <section className="p-6">
+        <p className="text-gray-500">Loading analytics...</p>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -46,10 +71,6 @@ export default function AnalyticsReports() {
           </p>
         </div>
         <div className="analytics-header-actions">
-          <button type="button" className="analytics-filter-button">
-            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-            Advanced Filters
-          </button>
           <button type="button" className="analytics-export-button">
             <Download className="h-4 w-4" aria-hidden="true" />
             Export Report
@@ -57,50 +78,9 @@ export default function AnalyticsReports() {
         </div>
       </div>
 
-      {/* Category filter chips + period selector */}
-      <div className="analytics-toolbar">
-        <div className="analytics-filter-chips scrollbar-hide">
-          {CATEGORY_FILTERS.map((label) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => setActiveFilter(label)}
-              aria-pressed={activeFilter === label}
-              className={`analytics-filter-chip ${
-                activeFilter === label ? "analytics-filter-chip-active" : "analytics-filter-chip-inactive"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="analytics-period">
-          <span className="analytics-period-label">Period</span>
-          <label className="sr-only" htmlFor="period-start">
-            Start date
-          </label>
-          <input
-            id="period-start"
-            type="date"
-            defaultValue="2026-05-01"
-            className="analytics-period-input"
-          />
-          <span aria-hidden="true">–</span>
-          <label className="sr-only" htmlFor="period-end">
-            End date
-          </label>
-          <input
-            id="period-end"
-            type="date"
-            defaultValue="2026-06-01"
-            className="analytics-period-input"
-          />
-        </div>
-      </div>
-
       {/* KPI metric cards */}
       <div className="analytics-kpi-grid">
-        {ANALYTICS_KPIS.map(({ label, value, delta, trend }) => (
+        {kpis.map(({ label, value, delta, trend }) => (
           <div key={label} className="analytics-kpi-card">
             <p className="analytics-kpi-label">{label}</p>
             <div className="analytics-kpi-row">
@@ -123,7 +103,7 @@ export default function AnalyticsReports() {
           <h3 className="analytics-chart-title">Redemption Trends</h3>
           <div className="analytics-chart-container">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={REDEMPTION_TRENDS}>
+              <LineChart data={redemptionTrends}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                 <XAxis dataKey="month" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
@@ -138,7 +118,7 @@ export default function AnalyticsReports() {
           <h3 className="analytics-chart-title">Top Vouchers</h3>
           <div className="analytics-chart-container">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={TOP_VOUCHERS} layout="vertical" margin={{ left: 16 }}>
+              <BarChart data={topVouchers} layout="vertical" margin={{ left: 16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
                 <XAxis type="number" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} width={80} />
@@ -157,8 +137,8 @@ export default function AnalyticsReports() {
           <div className="analytics-chart-container">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={CATEGORY_DISTRIBUTION} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={2}>
-                  {CATEGORY_DISTRIBUTION.map((entry, index) => (
+                <Pie data={categoryDistribution} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90} paddingAngle={2}>
+                  {categoryDistribution.map((entry, index) => (
                     <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
@@ -172,7 +152,7 @@ export default function AnalyticsReports() {
         <div className="analytics-chart-card">
           <h3 className="analytics-chart-title">Real-time Performance</h3>
           <div className="analytics-metrics-list">
-            {REALTIME_METRICS.map((metric) => (
+            {realtimeMetrics.map((metric) => (
               <div key={metric.label}>
                 <div className="analytics-metric-row">
                   <span className="analytics-metric-label">{metric.label}</span>

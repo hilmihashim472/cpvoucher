@@ -87,3 +87,7 @@ VoucherHub-keypairs.ppk
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Uploads
+uploads/
+!uploads/.gitkeep
