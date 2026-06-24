@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Mail, Lock, Eye, EyeOff, Check } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Check, ArrowLeft } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURES = [
@@ -161,9 +161,9 @@ export default function Login() {
                 />
                 Remember me
               </label>
-              <a href="#" className="auth-forgot-link">
+              <Link to="/forgot-password" className="auth-forgot-link">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <button type="submit" disabled={loading} className="auth-submit-button">
