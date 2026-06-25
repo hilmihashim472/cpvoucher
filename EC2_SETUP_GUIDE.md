@@ -61,7 +61,7 @@ If your key is `.pem` format instead of `.ppk`:
 2. **Session**:
    - Host Name: `ubuntu@YOUR_EC2_IP` (e.g., `ubuntu@54.123.45.67`)
    - Port: `22`
-   - Connection type: `SSH`
+   - Connection type: `SSH Client`
 
 3. **Connection → SSH → Auth**:
    - Click "Browse" and select `cpvoucher-key.ppk`
@@ -138,13 +138,13 @@ Add these secrets:
 EC2_HOST = 54.123.45.67  (your EC2 public IP)
 EC2_SSH_KEY = (content of cpvoucher-key.ppk file)
 GH_TOKEN = (GitHub Personal Access Token)
-MONGO_URI = mongodb+srv://mukhrizbusiness_db_user:uUo5t2nijSgQ6kho@carterclone.dz6borv.mongodb.net/?appName=CarterClone
+MONGO_URI = mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majoritydz6borv.mongodb.net/?appName=CarterClone
 JWT_SECRET = (generate a secure random string)
-EMAIL_USER = mukhrizbusiness@gmail.com
-EMAIL_PASS = (your Gmail app password)
-GEMINI_API_KEY = AQ.Ab8RN6KiBG9hrtVOFf3bUfUQysqHZD-asSD_Z5JFmQq8S9NB4Q
-GOOGLE_CLIENT_ID = 76203202594-gat5sd337att28fl5eselk5jlqv0p0np.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET = 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
+EMAIL_USER=<your_gmail_address@gmail.com>
+EMAIL_PASS=<your_16_char_app_password>
+GEMINI_API_KEY=<your_gemini_api_key>
+GOOGLE_CLIENT_ID=<your_google_client_id>
+GOOGLE_CLIENT_SECRET=<your_google_client_secret>
 ```
 
 ### How to get each secret:
