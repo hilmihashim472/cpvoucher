@@ -1,8 +1,8 @@
-name: Frontend CD
+name: Full-Stack CD
 
 on:
   push:
-    branches: [ deploy-test ]
+    branches: [ master ]
 
 jobs:
   deploy:
@@ -17,44 +17,108 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          set -e  # Exit on any error - fixes silent failures
+          set -e
 
-          # Install NVM if not present
           export NVM_DIR="$HOME/.nvm"
           if [ ! -s "$NVM_DIR/nvm.sh" ]; then
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
           fi
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-          # Install and use Node.js 22 (Vite 8 requires Node.js 20+)
-          nvm install 22
+          nvm use 22 || nvm install 22
           nvm use 22
 
-          # Clone if not exists, otherwise pull latest
           if [ ! -d "$HOME/cpvoucher" ]; then
             git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/hilmihashim472/cpvoucher.git $HOME/cpvoucher
             cd $HOME/cpvoucher
-            git checkout deploy-test
+            git checkout master
           else
             cd $HOME/cpvoucher
           fi
           git fetch --all
-          git reset --hard origin/deploy-test
-          cd frontend
+          git reset --hard origin/master
+
+          echo "Setting up backend..."
+          cd backend
+          npm install
+
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" > .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "NODE_ENV=production" >> .env
+          echo "API_URL=http://localhost:5000" >> .env
+          echo "FRONTEND_URL=http://${{ secrets.EC2_HOST }}" >> .env
+          echo "EMAIL_HOST=smtp.gmail.com" >> .env
+          echo "EMAIL_PORT=587" >> .env
+          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
+          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+          echo "GEMINI_MODEL=gemini-2.5-flash" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+
+          if ! command -v pm2 &> /dev/null; then
+            npm install -g pm2
+          fi
+
+          pm2 startOrReload ecosystem.config.js || pm2 start server.js --name cpvoucher-backend
+          pm2 save
+          pm2 startup
+
+          echo "Setting up frontend..."
+          cd ../frontend
           npm install
           npm run build
-          # Remove old files and copy new build
+
           sudo rm -rf /var/www/html/*
           sudo cp -r dist/* /var/www/html/
 
-          # Fix permissions so Nginx can read the files
           sudo chown -R www-data:www-data /var/www/html
           sudo find /var/www/html -type f -exec chmod 644 {} \;
           sudo find /var/www/html -type d -exec chmod 755 {} \;
 
-          # Fix SPA routing: always serve index.html for non-file routes
-          if ! grep -q "try_files.*\/index\.html" /etc/nginx/sites-enabled/default; then
-            sudo sed -i 's|try_files $uri $uri/ =404;|try_files $uri $uri/ /index.html;|' /etc/nginx/sites-enabled/default
-          fi
+          echo "Configuring Nginx..."
+          sudo tee /etc/nginx/sites-available/cpvoucher > /dev/null << 'NGINXCONF'
+server {
+    listen 80;
+    server_name _;
 
+    root /var/www/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://localhost:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /auth/ {
+        proxy_pass http://localhost:5000/auth/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+NGINXCONF
+
+          sudo ln -sf /etc/nginx/sites-available/cpvoucher /etc/nginx/sites-enabled/
+          sudo rm -f /etc/nginx/sites-enabled/default
+
+          sudo nginx -t
           sudo systemctl restart nginx
+
+          echo "Deployment completed successfully!"
