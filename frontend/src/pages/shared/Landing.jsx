@@ -241,7 +241,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="landing-footer-bottom">
-            <p className="landing-footer-copyright">© 2024 VoucherHub. All rights reserved.</p>
+            <p className="landing-footer-copyright">© {new Date().getFullYear()} VoucherHub. All rights reserved.</p>
           </div>
         </div>
       </footer>

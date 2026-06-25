@@ -259,7 +259,7 @@ export default function Cart() {
                     setCartItems([]);
                     window.dispatchEvent(new Event("cartUpdated"));
 
-                    // Download PDF receipt
+                    /* Download PDF receipt
                     if (res.data.receiptUrl) {
                       const link = document.createElement("a");
                       link.href = `http://localhost:5000${res.data.receiptUrl}`;
@@ -267,10 +267,11 @@ export default function Cart() {
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
-                    }
-
+                    }*/
+                    // 
                     toast.success(
-                      "Redemption successful! Receipt downloaded and sent to your email."
+                      "Redemption successful! You can see your codes in the Orders tab or check your email for the codes.",
+                      { duration: 10000}
                     );
                   } catch (err) {
                     toast.error(err.response?.data?.message || "Redemption failed");

@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+if(process.platform === 'win32') {dns.setServers(['8.8.8.8', '1.1.1.1']);} // Use Google/Cloudflare DNS for SRV resolution
  
 async function connectDB() {
     try {

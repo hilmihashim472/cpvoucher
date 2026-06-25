@@ -326,7 +326,7 @@ export default function OrderHistory() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-1 opacity-70 hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => handleViewReceipt(order)}
                               className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"

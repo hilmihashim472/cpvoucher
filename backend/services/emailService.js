@@ -39,10 +39,10 @@ const sendReceiptEmail = async (user, orderData, pdfPath) => {
  */
 const generateEmailHTML = (orderData, user) => {
   const { orderNumber, items, totalPoints, timestamp } = orderData;
-  const date = new Date(timestamp).toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric', 
-    year: 'numeric' 
+  const date = new Date(timestamp).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
   });
 
   const primaryColor = "#6366f1";
@@ -156,6 +156,20 @@ const generateEmailHTML = (orderData, user) => {
               </table>
             </td>
           </tr>
+          <tr>
+            <td style="padding: 0 40px 40px 40px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #fef2f2; border-radius: 12px; border: 1px solid #fecaca;">
+                <tr>
+                  <td style="padding: 16px 20px; text-align: center;">
+                    <p style="margin: 0; font-size: 13px; color: #dc2626; font-weight: 600; line-height: 1.5;">
+                      ⏰ Expiry Reminder: Your voucher codes will expire <span style="text-decoration: underline; text-decoration-color: #dc2626;">24 hours</span> after redemption. Use them before they're gone!
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
         </table>
 
         <!-- Footer -->
