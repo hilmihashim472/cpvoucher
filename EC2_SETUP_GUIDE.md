@@ -1,6 +1,6 @@
 # EC2 Setup Guide for cpvoucher Deployment
 
-This guide will walk you through setting up a new EC2 instance and deploying your full-stack application using PuTTY.
+This guide will walk you through setting up a new EC2 instance and deploying your full-stack application using PuTTY. Yes
 
 ---
 
