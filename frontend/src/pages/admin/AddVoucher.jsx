@@ -11,6 +11,7 @@ import {
   Sparkles,
   Loader2,
   X,
+  Info,
 } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import { useAuth } from "../../hooks/useAuth.jsx";
@@ -460,12 +461,23 @@ export default function AddVoucher() {
                   <div className="vadd-field">
                     <label htmlFor="v-discountAmount" className="vadd-label">
                       Discount Amount
+                      <span className="vadd-discount-tooltip-wrapper">
+                        <Info className="vadd-discount-info-icon" aria-hidden="true" />
+                        <span className="vadd-discount-tooltip">
+                          <strong>What is this?</strong><br />
+                          For <em>percentage-off vouchers</em>, enter the discount percentage.<br />
+                          E.g., "Adidas 30% off" → <strong>30</strong> | "Free 3 months Spotify" → <strong>100</strong><br /><br />
+                          For <em>flat-price vouchers</em> (e.g., "Apple Store $100 Off"), leave as <strong>0</strong>.<br /><br />
+                          This value is used to calculate the <strong>Avg Discount</strong> in Analytics.
+                        </span>
+                      </span>
                     </label>
                     <input
                       id="v-discountAmount"
                       name="discountAmount"
                       type="number"
                       min="0"
+                      max="100"
                       placeholder="e.g. 10"
                       value={form.discountAmount}
                       onChange={handleChange}

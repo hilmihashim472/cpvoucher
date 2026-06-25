@@ -78,6 +78,8 @@ EC2_SSH_KEY
 GH_TOKEN.txt
 VoucherHub-keypairs.ppk
 *.ppk
+client_secret_*.json
+
 
 # OS generated files
 .DS_Store

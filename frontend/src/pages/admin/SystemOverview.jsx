@@ -73,7 +73,7 @@ export default function SystemOverview() {
   const totalPending = 0;
   const kpiStats = [
     { label: "Total Users", value: kpis.totalUsers, delta: `${kpis.activeUsers} active`, icon: Users },
-    { label: "Total Orders", value: kpis.totalOrders, delta: "All time", icon: ShoppingBag },
+    { label: "Total Unique Orders", value: kpis.totalOrders, delta: "All time", icon: ShoppingBag },
     { label: "Total Vouchers", value: kpis.totalVouchers, delta: `${kpis.activeVouchers} active`, icon: Ticket },
     { label: "Points Redeemed", value: kpis.totalPointsRedeemed.toLocaleString(), delta: "All time", icon: Star },
   ];

@@ -9,7 +9,10 @@ const userSchema = new mongoose.Schema(
     is_active: { type: Boolean, default: true },
     points: { type: Number, default: 2500 },
     role: { type: String, enum: ["user", "admin"], default: "user" },
-    profile_picture: { type: String, default: null }
+    profile_picture: { type: String, default: null },
+    googleId: { type: String, default: null },
+    resetToken:{ type: String, default: null },
+    resetTokenExpires: { type: Date, default: null }
   },
   { timestamps: true },
 );

@@ -24,6 +24,7 @@ const METRIC_TONE_STYLES = {
   warning: "analytics-metric-fill-warning",
   success: "analytics-metric-fill-success",
   primary: "analytics-metric-fill-primary",
+  danger: "analytics-metric-fill-danger",
 };
 
 export default function AnalyticsReports() {
@@ -80,9 +81,10 @@ export default function AnalyticsReports() {
 
       {/* KPI metric cards */}
       <div className="analytics-kpi-grid">
-        {kpis.map(({ label, value, delta, trend }) => (
+        {kpis.map(({ label, value, delta, trend, subtitle }) => (
           <div key={label} className="analytics-kpi-card">
             <p className="analytics-kpi-label">{label}</p>
+            {subtitle && <p className="analytics-kpi-subtitle">{subtitle}</p>}
             <div className="analytics-kpi-row">
               <p className="analytics-kpi-value">{value}</p>
               <span
@@ -122,7 +124,10 @@ export default function AnalyticsReports() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
                 <XAxis type="number" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} width={80} />
-                <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #E2E8F0" }} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: 8, border: "1px solid #E2E8F0" }}
+                  formatter={(value, name) => [value, "Total Vouchers Redeemed"]}
+                />
                 <Bar dataKey="value" fill="#1A56DB" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>

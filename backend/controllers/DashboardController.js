@@ -41,27 +41,52 @@ exports.getAnalytics = async (req, res) => {
     ]);
 
     // Metrics
-    const totalRedemptions = await CartItemHistory.countDocuments();
+    const totalRedemptionsAgg = await CartItemHistory.aggregate([
+      { $group: { _id: null, total: {$sum : "$quantity"} }}
+    ]);
+    const totalRedemptions = totalRedemptionsAgg[0]?.total || 0;
     const totalUsers = await User.countDocuments();
     const activeVouchers = await Voucher.countDocuments({ status: "active" });
     const avgRedemptionsPerUser = totalUsers > 0 ? Math.round(totalRedemptions / totalUsers) : 0;
+    const expiredVouchers = await Voucher.countDocuments({ expiresAt: { $lt: new Date() } });
+    const fullyClaimed = await Voucher.countDocuments({ $expr: { $gte: ["$usageCount", "$quantity"] } });
+    const draftVouchers = await Voucher.countDocuments({ status: "draft" });
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const recentOrdersToday = await CartItemHistory.countDocuments({ timestamp: { $gte: startOfToday } });
 
     const realtimeMetrics = [
-      { label: "Total Redemptions", value: totalRedemptions.toString(), unit: "", percent: Math.min(totalRedemptions / 10, 100), tone: "primary" },
-      { label: "Active Vouchers", value: activeVouchers.toString(), unit: "", percent: Math.min(activeVouchers * 2, 100), tone: "success" },
-      { label: "Avg per User", value: avgRedemptionsPerUser.toString(), unit: "", percent: Math.min(avgRedemptionsPerUser * 5, 100), tone: "warning" },
+      { label: "Orders Today", value: recentOrdersToday.toString(), unit: "", percent: Math.min(recentOrdersToday * 10, 100), tone: "primary" },
+      { label: "Total Voucher Redemptions", value: totalRedemptions.toString(), unit: "", percent: Math.min(totalRedemptions / 10, 100), tone: "primary" },
+      //{ label: "Active Vouchers", value: activeVouchers.toString(), unit: "", percent: Math.min(activeVouchers * 2, 100), tone: "success" },
+      { label: "Average per User", value: avgRedemptionsPerUser.toString(), unit: "", percent: Math.min(avgRedemptionsPerUser * 5, 100), tone: "warning" },
+      { label: "Fully Claimed Vouchers", value: fullyClaimed.toString(), unit: "", percent: Math.min(fullyClaimed * 5, 100), tone: "warning" },
+      { label: "Draft Vouchers", value: draftVouchers.toString(), unit: "", percent: Math.min(draftVouchers * 5, 100), tone: "warning" },
+      { label: "Expired Vouchers", value: expiredVouchers.toString(), unit: "", percent: Math.min(expiredVouchers * 5, 100), tone: "danger" },
     ];
+
+    // Calculate average discount from vouchers with a real percentage discount
+    const avgDiscountAgg = await Voucher.aggregate([
+      { $match: { discountAmount: { $gt: 0 } } },
+      { $group: { _id: null, avgDiscount: { $avg: "$discountAmount" } } }
+    ]);
+    const avgDiscount = avgDiscountAgg[0]?.avgDiscount || 0;
 
     const totalPointsRedeemedAgg = await CartItemHistory.aggregate([
       { $group: { _id: null, total: { $sum: "$pointsUsed" } } }
     ]);
     const totalPointsRedeemed = totalPointsRedeemedAgg[0]?.total || 0;
 
+    // Calculate redemption rate
+    const vouchersUsed = await Voucher.countDocuments({ usageCount: { $gt: 0 } });
+    const totalVouchers = await Voucher.countDocuments();
+    const redemptionRate = totalVouchers > 0 ? Math.round((vouchersUsed / totalVouchers) * 100) : 0;
+
     const analyticsKPIs = [
-      { label: "Total Redemptions", value: totalRedemptions.toLocaleString(), delta: "+14.2%", trend: "up" },
-      { label: "Active Users", value: totalUsers.toLocaleString(), delta: "+8.2%", trend: "up" },
-      { label: "Avg Discount", value: "23.5%", delta: "-1.4%", trend: "down" },
-      { label: "Net Savings", value: `$${(totalPointsRedeemed * 0.1).toLocaleString()}`, delta: "+19.6%", trend: "up" },
+      { label: "Total Voucher Redemptions", value: totalRedemptions.toLocaleString(), delta: "+14.2%", trend: "up", subtitle: "All time" },
+      { label: "Active Users", value: totalUsers.toLocaleString(), delta: "+8.2%", trend: "up", subtitle: "Registered accounts"},
+      { label: "Average Discount/Voucher", value: `${avgDiscount.toFixed(1)}%`, delta: "-1.4%", trend: "down", subtitle: "Percentage-off vouchers only" },
+      { label: "Redemption Rate", value: `${redemptionRate}%`, delta: "+19.6%", trend: "up", subtitle: "Vouchers claimed at least once" },
     ];
 
     res.json({

@@ -20,6 +20,8 @@ import ProfileUserPage from "./pages/user/ProfileUser";
 import LoginPage from "./pages/shared/Login";
 import RegisterPage from "./pages/shared/Register";
 import ForgotPasswordPage from "./pages/shared/ForgotPassword";
+import ResetPasswordPage from "./pages/shared/ResetPassword";
+import GoogleCallbackPage from "./pages/shared/GoogleCallback";
 import AdminDashboardPage from "./pages/admin/Dashboard";
 import VoucherListPage from "./pages/admin/VoucherList";
 import AddVoucherPage from "./pages/admin/AddVoucher";
@@ -89,6 +91,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
         <Route
           path="/admin"
           element={

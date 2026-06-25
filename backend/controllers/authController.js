@@ -264,6 +264,117 @@ exports.removeProfilePicture = async (req, res) => {
   }
 };
 
+// ─── Password Reset ────────────────────────────────────────────────────────────
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    // Always return success regardless of whether the email exists (security best practice)
+    if (!user) {
+      return res.json({ message: "If that email is registered, a reset link has been sent." });
+    }
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // Hash the token before storing it
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    user.resetToken = hashedToken;
+    user.resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    await user.save();
+
+    // Send reset email
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    try {
+      const { sendResetEmail } = require("../services/emailService");
+      await sendResetEmail(user, resetLink);
+    } catch (emailError) {
+      console.error("Email send failed:", emailError.message);
+      // Don't reveal email failures to the client
+    }
+
+    res.json({ message: "If that email is registered, a reset link has been sent." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: "Token and new password are required" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
+
+    // Hash the token to find the user
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetToken: hashedToken,
+      resetTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Token is invalid or has expired" });
+    }
+
+    // Update password and clear reset fields
+    user.password = await bcrypt.hash(password, 10);
+    user.resetToken = null;
+    user.resetTokenExpires = null;
+
+    // Invalidate all refresh tokens for security
+    await RefreshToken.deleteMany({ user: user._id });
+
+    await user.save();
+
+    res.json({ message: "Password has been reset successfully. You can now log in." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ─── Google OAuth ─────────────────────────────────────────────────────────────
+
+exports.googleCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/login?error=auth_failed`);
+    }
+
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken();
+
+    await RefreshToken.create({
+      token: refreshToken,
+      user: user._id,
+      expires: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
+    });
+
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+
+    // Redirect to frontend with the access token
+    res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:3000"}/auth/google/callback?token=${accessToken}`
+    );
+  } catch (err) {
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/login?error=server_error`);
+  }
+};
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
 exports.adminCreateUser = async (req, res) => {

@@ -9,6 +9,8 @@ const connectDB = require("./config/db");
 const adminRoutes = require('./routes/adminRoutes');
 const orderHistoryRoutes = require("./routes/orderHistoryRoutes");
 
+const passport = require("./config/passport");
+
 const app = express();
 
 // ─────────────────────────────────────────────
@@ -37,6 +39,7 @@ app.use(
   })
 );
 
+app.use(passport.initialize());
 app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" })); // For form submissions
