@@ -118,10 +118,17 @@ export default function OrderList() {
   const totalPending = orders.filter((o) => o.status === "pending").length;
 
   /* ── Export to CSV ── */
-  const exportCSV = () => {
+  const exportCSV = async () => {
+  try {
+    toast.loading("Exporting all orders...", { id: "export" });
+    
+    // Fetch ALL orders (no pagination)
+    const { data } = await api.get(`/admin/orders?limit=1000&page=1`);
+    const allOrders = data.orders || [];
+    
     const headers = ["Order ID", "User", "Voucher", "Points", "Date"];
     
-    const rows = orders.map((o) => [
+    const rows = allOrders.map((o) => [
       o.orderNumber || o.id || "",
       o.user?.fullName || o.user?.username || o.user || "Unknown",
       o.voucher?.title || o.voucher || "Unknown",
@@ -143,8 +150,13 @@ export default function OrderList() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    toast.success("Orders exported successfully!");
+    toast.success(`Exported ${allOrders.length} orders successfully!`, { id: "export" });
+  } catch (error) {
+    toast.error("Failed to export orders", { id: "export" });
+    console.error("Export error:", error);
+  }
 };
+
 
 
   /* ────────────────────────────────────────────
