@@ -117,7 +117,7 @@ exports.getStats = async (req, res) => {
 
     const recentActivity = await CartItemHistory.find()
       .sort({ createdAt: -1 })
-      .limit(10)
+      .limit(5)
       .populate("user", "username fullName")
       .populate("voucher", "title");
 
