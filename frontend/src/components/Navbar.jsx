@@ -24,15 +24,21 @@ export default function Navbar({ variant = "default" }) {
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const isActive = (to) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
+  const isActive = (to) =>
+    to === "/" ? pathname === "/" : pathname.startsWith(to);
 
   const loadCartCount = useCallback(() => {
     if (variant !== "default") return;
     api
       .get("/cart")
       .then((res) => {
-        const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
-        const totalQuantity = items.reduce((sum, item) => sum + (item.id ?? 1), 0);
+        const items = Array.isArray(res.data)
+          ? res.data
+          : (res.data?.items ?? []);
+        const totalQuantity = items.reduce(
+          (sum, item) => sum + (item.id ?? 1),
+          0,
+        );
         setCartCount(totalQuantity);
       })
       .catch(() => setCartCount(0));
@@ -53,8 +59,15 @@ export default function Navbar({ variant = "default" }) {
         <div className="navbar-inner">
           <div className="navbar-bar">
             {/* Logo — always visible */}
-            <Link to={variant === "default" ? "/home" : "/"} className="navbar-logo">
-              Carter Bank Voucher
+            <Link
+              to={variant === "default" ? "/home" : "/"}
+              className="navbar-logo"
+            >
+              <img
+                src="/cbvnavbar.svg"
+                alt="Carter Bank Voucher"
+                className="navbar-logo-img"
+              />
             </Link>
 
             {/* Desktop nav links */}
@@ -85,7 +98,11 @@ export default function Navbar({ variant = "default" }) {
                       if (e.key === "Enter") {
                         e.preventDefault();
                         const query = searchQuery.trim();
-                        navigate(query ? `/categories?search=${encodeURIComponent(query)}` : "/categories");
+                        navigate(
+                          query
+                            ? `/categories?search=${encodeURIComponent(query)}`
+                            : "/categories",
+                        );
                       }
                     }}
                     className="navbar-search-input"
@@ -98,9 +115,14 @@ export default function Navbar({ variant = "default" }) {
               {variant === "default" ? (
                 <>
                   {/* Points badge — visible on all screen sizes */}
-                  <div className="navbar-points-badge" aria-label={`${user?.points ?? 0} points`}>
+                  <div
+                    className="navbar-points-badge"
+                    aria-label={`${user?.points ?? 0} points`}
+                  >
                     <Coins className="navbar-points-icon" aria-hidden="true" />
-                    <span className="navbar-points-text">{(user?.points ?? 0).toLocaleString()} pts</span>
+                    <span className="navbar-points-text">
+                      {(user?.points ?? 0).toLocaleString()} pts
+                    </span>
                   </div>
 
                   {/* Cart + Avatar — desktop only (bottom nav handles mobile) */}
@@ -119,22 +141,30 @@ export default function Navbar({ variant = "default" }) {
                     <div className="navbar-profile-dropdown">
                       <button
                         type="button"
-                        onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                        onClick={() =>
+                          setProfileDropdownOpen(!profileDropdownOpen)
+                        }
                         aria-label="Open profile menu"
                         aria-expanded={profileDropdownOpen}
                         className="navbar-avatar"
                       >
                         {user?.profilePicture ? (
-                          <img src={user.profilePicture} alt="" className="navbar-avatar-image" />
+                          <img
+                            src={user.profilePicture}
+                            alt=""
+                            className="navbar-avatar-image"
+                          />
                         ) : (
-                          user?.name?.charAt(0) ?? "U"
+                          (user?.name?.charAt(0) ?? "U")
                         )}
                       </button>
                       {profileDropdownOpen && (
                         <div className="navbar-dropdown-menu">
                           <div className="navbar-dropdown-header">
                             <p className="navbar-dropdown-name">{user?.name}</p>
-                            <p className="navbar-dropdown-email">{user?.email}</p>
+                            <p className="navbar-dropdown-email">
+                              {user?.email}
+                            </p>
                           </div>
                           <div className="navbar-dropdown-divider" />
                           <Link
@@ -161,22 +191,28 @@ export default function Navbar({ variant = "default" }) {
                       )}
                     </div>
                   </div>
-
                 </>
               ) : user ? (
                 <div className="navbar-auth-buttons">
-                  <Link to="/cart" className="navbar-login-button">Cart</Link>
-                  <Link to="/profile" className="navbar-signup-button">Profile</Link>
+                  <Link to="/cart" className="navbar-login-button">
+                    Cart
+                  </Link>
+                  <Link to="/profile" className="navbar-signup-button">
+                    Profile
+                  </Link>
                 </div>
               ) : (
                 <div className="navbar-auth-buttons">
-                  <Link to="/login" className="navbar-login-button">Login</Link>
-                  <Link to="/register" className="navbar-signup-button">Sign Up</Link>
+                  <Link to="/login" className="navbar-login-button">
+                    Login
+                  </Link>
+                  <Link to="/register" className="navbar-signup-button">
+                    Sign Up
+                  </Link>
                 </div>
               )}
             </div>
           </div>
-
         </div>
       </header>
 

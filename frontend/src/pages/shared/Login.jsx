@@ -72,7 +72,7 @@ export default function Login() {
     <div className="auth-shell">
       {/* Left branding panel */}
       <div className="auth-left">
-        <span className="auth-left-logo">Carter Bank Voucher</span>
+        <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-logo-img auth-logo-img-white" />
         <div>
           <h1 className="auth-left-title">Welcome back to your savings hub.</h1>
           <p className="auth-left-subtitle">
@@ -100,7 +100,7 @@ export default function Login() {
 
       {/* Right form panel */}
       <div className="auth-right">
-        <span className="auth-mobile-logo">Carter Bank Voucher</span>
+        <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-mobile-logo" />
 
         <div className="auth-card">
           <h2 className="auth-card-title">Sign in to your account</h2>

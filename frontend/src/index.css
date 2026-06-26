@@ -140,10 +140,28 @@ body {
 
 /* ===== components/VoucherCard.jsx ===== */
 .voucher-card {
-  @apply flex flex-col rounded-xl border border-line bg-white p-5 shadow-sm transition-shadow;
+  @apply flex flex-col overflow-hidden rounded-xl border border-line bg-white shadow-sm transition-shadow;
 }
 .voucher-card:hover {
   @apply shadow-md;
+}
+.voucher-card-image {
+  @apply relative h-36 w-full shrink-0 overflow-hidden;
+}
+.voucher-card-img {
+  @apply h-full w-full object-cover;
+}
+.voucher-card-img-placeholder {
+  @apply flex h-full w-full items-center justify-center;
+}
+.voucher-card-img-initial {
+  @apply text-4xl font-extrabold opacity-60;
+}
+.voucher-card-badge-overlay {
+  @apply absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+}
+.voucher-card-body {
+  @apply flex flex-col flex-1 p-5;
 }
 .voucher-card-top-row {
   @apply flex items-center justify-between gap-2;
@@ -204,6 +222,12 @@ body {
 .footer-brand-name {
   @apply text-xl font-extrabold text-primary;
 }
+.footer-brand-identity {
+  @apply flex flex-col items-start gap-2;
+}
+.footer-brand-logo {
+  @apply h-20 w-auto;
+}
 .footer-brand-tagline {
   @apply mt-3 max-w-xs text-sm text-muted;
 }
@@ -249,7 +273,13 @@ body {
   @apply flex h-16 items-center justify-between gap-4;
 }
 .navbar-logo {
-  @apply shrink-0 text-xl font-extrabold text-primary;
+  @apply shrink-0 flex items-center;
+}
+.navbar-logo-img {
+  @apply h-10 w-auto;
+}
+.navbar-logo-text {
+  @apply text-xl font-extrabold text-primary;
 }
 .navbar-links {
   @apply hidden items-center gap-6 lg:flex;
@@ -1432,11 +1462,11 @@ body {
 .amnav-topbar-logo {
   @apply flex items-center gap-2.5;
 }
-.amnav-topbar-logo-icon {
-  @apply flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow;
+.amnav-topbar-logo-img {
+  @apply h-9 w-auto;
 }
 .amnav-topbar-logo-text {
-  @apply text-base font-bold text-gray-900 tracking-tight;
+  @apply text-base font-extrabold tracking-tight text-[#1a56db];
 }
 .amnav-topbar-avatar {
   @apply flex items-center justify-center rounded-full ring-2 ring-white shadow-sm;
@@ -2149,6 +2179,18 @@ body {
 .auth-left {
   @apply hidden flex-col justify-between bg-navy px-10 py-12 lg:flex lg:w-1/2;
 }
+.auth-logo-group {
+  @apply flex flex-col items-start gap-2;
+}
+.auth-mobile-logo-group {
+  @apply mb-8 flex flex-col items-center gap-2 lg:hidden;
+}
+.auth-logo-img {
+  @apply h-28 w-auto;
+}
+.auth-logo-img-white {
+  @apply brightness-0 invert;
+}
 .auth-left-logo {
   @apply text-2xl font-extrabold text-white;
 }
@@ -2180,7 +2222,7 @@ body {
   @apply flex flex-1 flex-col items-center justify-center bg-surface px-6 py-12;
 }
 .auth-mobile-logo {
-  @apply mb-8 text-2xl font-extrabold text-primary lg:hidden;
+  @apply mb-8 h-20 w-auto lg:hidden;
 }
 .auth-card {
   @apply w-full max-w-md rounded-2xl border border-line bg-white p-8 shadow-sm;

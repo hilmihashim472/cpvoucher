@@ -391,7 +391,7 @@ export default function CategoryList() {
                           </td>
                           {/* Actions */}
                           <td className="px-6 py-4">
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => openEdit(cat)}
                                 className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"

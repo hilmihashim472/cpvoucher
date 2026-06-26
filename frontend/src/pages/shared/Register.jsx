@@ -93,7 +93,7 @@ export default function Register() {
     <div className="auth-shell">
       {/* Left branding panel */}
       <div className="auth-left">
-        <span className="auth-left-logo">Carter Bank Voucher</span>
+        <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-logo-img auth-logo-img-white" />
         <div>
           <h1 className="auth-left-title">Join thousands of smart shoppers.</h1>
           <p className="auth-left-subtitle">
@@ -121,7 +121,7 @@ export default function Register() {
 
       {/* Right form panel */}
       <div className="auth-right">
-        <span className="auth-mobile-logo">Carter Bank Voucher</span>
+        <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-mobile-logo" />
 
         <div className="auth-card">
           <h2 className="auth-card-title">Create your account</h2>

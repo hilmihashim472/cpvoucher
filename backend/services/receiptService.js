@@ -17,18 +17,18 @@ const generateReceiptPDF = async (orderData, user) => {
     const html = generateReceiptHTML(orderData, user);
 
     const browser = await puppeteer.launch({
-    executablePath: "/snap/bin/chromium",
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-    ],
-  });
+      executablePath: "/snap/bin/chromium",
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
+    });
 
     const page = await browser.newPage();
-    
+
     // Set content and wait for fonts/styles to load
     await page.setContent(html, { waitUntil: "networkidle0" });
 
@@ -40,7 +40,7 @@ const generateReceiptPDF = async (orderData, user) => {
       format: "A4",
       printBackground: true,
       margin: {
-        top: "0mm", 
+        top: "0mm",
         bottom: "0mm",
         left: "0mm",
         right: "0mm",
@@ -65,10 +65,14 @@ const generateReceiptPDF = async (orderData, user) => {
  */
 const generateReceiptHTML = (orderData, user) => {
   const { items, orderNumber, totalPoints, timestamp } = orderData;
-  const date = new Date(timestamp).toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric', 
-    year: 'numeric' 
+
+  const logoPath = path.join(__dirname, "../../frontend/public/cbvnavbar.svg");
+  const logoBase64 = fs.readFileSync(logoPath).toString("base64");
+  const logoSrc = `data:image/svg+xml;base64,${logoBase64}`;
+  const date = new Date(timestamp).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 
   return `
@@ -115,23 +119,9 @@ const generateReceiptHTML = (orderData, user) => {
       gap: 12px;
     }
 
-    .logo-icon {
-      width: 35px;
-      height: 35px;
-      background: var(--brand);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 20px;
-    }
-
-    .logo-text {
-      font-weight: 700;
-      font-size: 22px;
-      letter-spacing: -0.03em;
+    .logo-img {
+      height: 44px;
+      width: auto;
     }
 
     .receipt-badge {
@@ -300,8 +290,7 @@ const generateReceiptHTML = (orderData, user) => {
 
   <div class="header">
     <div class="logo-area">
-      <div class="logo-icon">V</div>
-      <span class="logo-text">Carter Bank Voucher</span>
+      <img src="${logoSrc}" alt="Carter Bank Voucher" class="logo-img" />
     </div>
     <div class="receipt-badge">Invoice ID: #${orderNumber}</div>
   </div>
@@ -334,7 +323,9 @@ const generateReceiptHTML = (orderData, user) => {
       </tr>
     </thead>
     <tbody>
-      ${items.map(item => `
+      ${items
+        .map(
+          (item) => `
         <tr>
           <td>
             <div class="item-title">${item.voucher.title}</div>
@@ -346,7 +337,9 @@ const generateReceiptHTML = (orderData, user) => {
             <span class="code-pill">${item.voucher.code}</span>
           </td>
         </tr>
-      `).join("")}
+      `,
+        )
+        .join("")}
     </tbody>
   </table>
 

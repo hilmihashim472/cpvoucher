@@ -108,13 +108,13 @@ export default function Sidebar() {
         `}
       >
         {/* ── LOGO ── */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <Link to="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-600/25">
-              VH
-            </div>
-            <span className="text-lg font-bold text-gray-900 tracking-tight">Carter Bank Voucher</span>
-          </Link>
+        <div className="flex items-start justify-between px-6 pt-5 pb-4">
+          <div className="flex-1 flex flex-col items-center gap-1">
+            <Link to="/admin" className="flex flex-col items-center gap-1">
+              <img src="/cbvnavbar.svg" alt="Carter Bank Voucher" className="h-9 w-auto" />
+              <span className="text-xs font-extrabold tracking-tight text-[#1a56db]">Administrator</span>
+            </Link>
+          </div>
           {/* Mobile close button */}
           <button
             type="button"
@@ -125,6 +125,7 @@ export default function Sidebar() {
             <X className="h-5 w-5" />
           </button>
         </div>
+        <div className="border-b border-gray-100" />
 
         {/* ── PROFILE CARD ── */}
         <div className="px-4 py-5 border-b border-gray-100">

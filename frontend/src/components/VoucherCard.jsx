@@ -43,6 +43,7 @@ const ICON_MAP = {
 };
 
 export default function VoucherCard({
+  image,
   brand,
   category,
   categoryIcon,
@@ -60,8 +61,34 @@ export default function VoucherCard({
 
   return (
     <article className="voucher-card">
+      {/* Image / placeholder */}
+      <div className="voucher-card-image">
+        {image ? (
+          <img src={image} alt={title} className="voucher-card-img" />
+        ) : (
+          <div
+            className="voucher-card-img-placeholder"
+            style={{ background: `linear-gradient(135deg, ${color}25, ${color}55)` }}
+          >
+            <span className="voucher-card-img-initial" style={{ color }}>
+              {brand?.charAt(0)}
+            </span>
+          </div>
+        )}
+        {badge && (
+          <span
+            className={`voucher-card-badge-overlay ${
+              badge.tone === "danger" ? "voucher-card-badge-danger" : "voucher-card-badge-accent"
+            }`}
+          >
+            {badge.label}
+          </span>
+        )}
+      </div>
+
+      <div className="voucher-card-body">
       <div className="voucher-card-top-row">
-        <span 
+        <span
           className="voucher-card-category-tag"
           style={{
             backgroundColor: `${color}15`,
@@ -69,22 +96,13 @@ export default function VoucherCard({
             color: color,
           }}
         >
-          <IconComponent 
-            className="voucher-card-category-tag-icon" 
-            aria-hidden="true" 
+          <IconComponent
+            className="voucher-card-category-tag-icon"
+            aria-hidden="true"
             style={{ color: color }}
           />
           {category}
         </span>
-        {badge && (
-          <span
-            className={`voucher-card-badge ${
-              badge.tone === "danger" ? "voucher-card-badge-danger" : "voucher-card-badge-accent"
-            }`}
-          >
-            {badge.label}
-          </span>
-        )}
       </div>
 
       <div className="voucher-card-brand-row">
@@ -105,6 +123,7 @@ export default function VoucherCard({
         <button type="button" onClick={onGetCode} className="voucher-card-cta">
           Get Code
         </button>
+      </div>
       </div>
     </article>
   );

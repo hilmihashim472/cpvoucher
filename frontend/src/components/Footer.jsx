@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-grid">
           <div>
-            <span className="footer-brand-name">Carter Bank Voucher</span>
+            <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="footer-brand-logo" />
             <p className="footer-brand-tagline">
               Your one-stop marketplace for redeeming reward points on the best
               deals from top brands worldwide.

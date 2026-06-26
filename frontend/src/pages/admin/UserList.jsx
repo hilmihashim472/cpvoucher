@@ -405,7 +405,7 @@ export default function UserList() {
                           <td className="px-6 py-4 text-sm text-gray-500">{u.joined}</td>
                           {/* Actions */}
                           <td className="px-6 py-4">
-                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center justify-end gap-1">
                               <button onClick={() => { setSelectedUser(u); setViewOpen(true); }}
                                 className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="View">
                                 <Eye className="h-4 w-4" />
