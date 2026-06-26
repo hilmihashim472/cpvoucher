@@ -17,7 +17,7 @@ A full-stack MERN Voucher Management System that allows users to browse, redeem,
 - Receive voucher confirmations via email
 - View redemption history
 - Profile management with image upload
-- Mobile-responsive user interface
+- Mobile-responsive user interfaces
 
 ### 🛠️ Admin Features
 
