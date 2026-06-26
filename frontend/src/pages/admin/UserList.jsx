@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Search, UserPlus, Pencil, Ban, Eye, X,
   ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
@@ -185,6 +185,12 @@ export default function UserList() {
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
   useEffect(() => { setPagination((p) => ({ ...p, page: 1 })); }, [debouncedSearch, activeFilter, sortField, sortOrder]);
 
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pagination.page]);
+
   /* ── Sort ── */
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -249,7 +255,7 @@ export default function UserList() {
       <Sidebar />
 
       <div className="admin-content">
-        <main className="admin-main p-6 lg:p-8 space-y-6">
+        <main className="admin-main">
 
           {/* ── HEADER ── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -267,13 +273,13 @@ export default function UserList() {
           </div>
 
           {/* ── STATS ROW ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { label: "Total Users", value: pagination.total, icon: Users, color: "text-blue-600 bg-blue-50" },
               { label: "Active", value: users.filter((u) => u.status === "active").length, icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
               { label: "Suspended", value: users.filter((u) => u.status === "suspended").length, icon: ShieldAlert, color: "text-red-600 bg-red-50" },
-            ].map((s) => (
-              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+            ].map((s, i, arr) => (
+              <div key={s.label} className={`bg-white rounded-2xl border border-gray-100 p-3 lg:p-4 flex items-center gap-3 shadow-sm${i === arr.length - 1 && arr.length % 2 !== 0 ? " col-span-2 sm:col-span-1" : ""}`}>
                 <div className={`p-2.5 rounded-xl ${s.color}`}>
                   <s.icon className="h-5 w-5" />
                 </div>
@@ -286,7 +292,7 @@ export default function UserList() {
           </div>
 
           {/* ── TOOLBAR ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 lg:p-4 flex flex-col md:flex-row md:items-center gap-3">
             {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -316,8 +322,105 @@ export default function UserList() {
             </div>
           </div>
 
+          {/* ── MOBILE CARDS ── */}
+          <div className="sm:hidden space-y-3">
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="animate-pulse bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gray-200" />
+                    <div className="space-y-1.5 flex-1">
+                      <div className="h-4 w-32 bg-gray-200 rounded" />
+                      <div className="h-3 w-40 bg-gray-100 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : users.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-4 bg-gray-100 rounded-2xl"><Users className="h-8 w-8 text-gray-400" /></div>
+                  <p className="text-sm font-medium text-gray-500">No users found</p>
+                  <p className="text-xs text-gray-400">Try adjusting your search or filters</p>
+                </div>
+              </div>
+            ) : (
+              users.map((u) => (
+                <div key={u.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className={`shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${getGradient(u.name)} flex items-center justify-center text-white text-sm font-bold shadow-sm`}>
+                        {u.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{u.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{u.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => { setSelectedUser(u); setViewOpen(true); }}
+                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => { setSelectedUser(u); setEditForm({ fullName: u.fullName, username: u.username, email: u.email, role: u.role, points: u.points }); setEditOpen(true); }}
+                        className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => openConfirm(u)}
+                        className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                        <Ban className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${u.role === "admin" ? "bg-violet-100 text-violet-700" : "bg-gray-100 text-gray-600"}`}>
+                      {u.role === "admin" ? <Shield className="h-3 w-3" /> : null}
+                      {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                    </span>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${u.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${u.status === "active" ? "bg-emerald-500" : "bg-red-500"}`} />
+                      {u.status.charAt(0).toUpperCase() + u.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className="mt-3 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400">Points</span>
+                      <span className="inline-flex items-center gap-1 text-gray-700 font-medium">
+                        <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+                        {u.points.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400">Joined</span>
+                      <span className="text-gray-700 font-medium">{u.joined}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+            {!loading && pagination.totalPages > 0 && (
+              <div className="cat-pagination">
+                <button onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))} disabled={pagination.page === 1} className="cat-pagination-button">Previous</button>
+                <div className="cat-pagination-pages">
+                  {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                    let pg;
+                    if (pagination.totalPages <= 5) pg = i + 1;
+                    else if (pagination.page <= 3) pg = i + 1;
+                    else if (pagination.page >= pagination.totalPages - 2) pg = pagination.totalPages - 4 + i;
+                    else pg = pagination.page - 2 + i;
+                    return (
+                      <button key={pg} onClick={() => setPagination((p) => ({ ...p, page: pg }))}
+                        className={`cat-pagination-page ${pg === pagination.page ? "cat-pagination-active" : "cat-pagination-inactive"}`}>{pg}</button>
+                    );
+                  })}
+                </div>
+                <button onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))} disabled={pagination.page === pagination.totalPages} className="cat-pagination-button">Next</button>
+              </div>
+            )}
+          </div>
+
           {/* ── TABLE ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="hidden sm:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

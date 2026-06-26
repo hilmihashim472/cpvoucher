@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { 
@@ -123,6 +123,13 @@ export default function OrderHistory() {
     setPage(1);
   }, [debouncedSearch, sortField, sortOrder]);
 
+  // Scroll to top whenever page changes
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
   // Handle sorting logic
   const handleSort = (field) => {
     if (sortField === field) {
@@ -188,6 +195,8 @@ export default function OrderHistory() {
   const lifetimeSavings = orders.reduce((acc, order) => acc + (order.discountAmount || 0), 0);
   const brandsCount = new Set(orders.map(o => o.voucher?.brand).filter(Boolean)).size;
 
+  const handlePageChange = (newPage) => setPage(newPage);
+
   const handleViewReceipt = (order) => {
     setSelectedOrder(order);
     setViewModalOpen(true);
@@ -197,15 +206,18 @@ export default function OrderHistory() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* ── HEADER ── */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Order History</h1>
-          <p className="mt-1 text-sm text-gray-500">Track every voucher you&apos;ve redeemed and view your receipts.</p>
+      {/* ── HERO BANNER ── */}
+      <section style={{ background: "linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%)" }}>
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-12 lg:px-8">
+          <h1 className="text-2xl font-extrabold text-white sm:text-4xl">Order History</h1>
+          <p className="mt-1 text-sm text-slate-300 sm:mt-2 sm:text-base">Track every voucher you&apos;ve redeemed and view your receipts.</p>
         </div>
+      </section>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
         {/* ── STATS ROW ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
             <div className="p-2.5 rounded-xl text-emerald-600 bg-emerald-50"><TrendingUp className="h-5 w-5" /></div>
             <div>
@@ -220,7 +232,7 @@ export default function OrderHistory() {
               <p className="text-xs text-gray-500 font-medium">Vouchers Redeemed ({brandsCount} brands)</p>
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+          <div className="col-span-2 sm:col-span-1 bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
             <div className="p-2.5 rounded-xl text-amber-600 bg-amber-50"><Wallet className="h-5 w-5" /></div>
             <div className="flex-1">
               <p className="text-xl font-bold text-gray-900">{Number(user?.points ?? 0).toLocaleString()}</p>
@@ -244,8 +256,131 @@ export default function OrderHistory() {
           </div>
         </div>
 
-        {/* ── TABLE CARD ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* ── MOBILE CARDS (< sm) ── */}
+        <div className="sm:hidden space-y-3">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-4 w-40 bg-gray-200 rounded" />
+                    <div className="h-3 w-24 bg-gray-100 rounded" />
+                  </div>
+                  <div className="h-8 w-8 bg-gray-200 rounded-lg" />
+                </div>
+                <div className="h-3 w-full bg-gray-100 rounded" />
+                <div className="h-3 w-3/4 bg-gray-100 rounded" />
+              </div>
+            ))
+          ) : error ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="p-4 bg-red-50 rounded-2xl"><AlertCircle className="h-8 w-8 text-red-400" /></div>
+                <p className="text-sm font-medium text-red-600">{error}</p>
+              </div>
+            </div>
+          ) : paginatedOrders.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="p-4 bg-gray-100 rounded-2xl"><Ticket className="h-8 w-8 text-gray-400" /></div>
+                <p className="text-sm font-medium text-gray-500">
+                  {debouncedSearch ? "No matching orders found" : "No orders found"}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {debouncedSearch ? "Try adjusting your search terms" : "You haven't redeemed any vouchers yet."}
+                </p>
+              </div>
+            </div>
+          ) : (
+            paginatedOrders.map((order) => {
+              const id = order._id ?? order.id;
+              const voucher = order.voucher || {};
+              return (
+                <div key={id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{voucher.title || "Unknown Voucher"}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{voucher.brand || "Unknown Brand"}</p>
+                    </div>
+                    <button
+                      onClick={() => handleViewReceipt(order)}
+                      className="shrink-0 p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      title="View Receipt"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="mt-3 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400">Redeemed</span>
+                      <span className="text-gray-700 font-medium">
+                        {order.timestamp ? new Date(order.timestamp).toLocaleDateString() : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400">Expires</span>
+                      <span className="text-gray-700 font-medium">
+                        {voucher.expiresAt ? new Date(voucher.expiresAt).toLocaleDateString() : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400">Points Used</span>
+                      <span className="text-gray-700 font-medium">{Number(order.pointsUsed ?? 0).toLocaleString()} pts</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 font-mono">
+                      {voucher.code || "—"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* ── MOBILE PAGINATION ── */}
+        {!loading && sortedOrders.length > PAGE_SIZE && (
+          <div className="sm:hidden cat-pagination">
+            <button
+              onClick={() => handlePageChange(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="cat-pagination-button"
+            >
+              Previous
+            </button>
+            <div className="cat-pagination-pages">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) pageNum = i + 1;
+                else if (page <= 3) pageNum = i + 1;
+                else if (page >= totalPages - 2) pageNum = totalPages - 4 + i;
+                else pageNum = page - 2 + i;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`cat-pagination-page ${pageNum === page ? "cat-pagination-active" : "cat-pagination-inactive"}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className="cat-pagination-button"
+            >
+              Next
+            </button>
+          </div>
+        )}
+
+        {/* ── DESKTOP TABLE (≥ sm) ── */}
+        <div className="hidden sm:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -356,7 +491,7 @@ export default function OrderHistory() {
               </p>
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
                   disabled={page === 1}
                   className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
@@ -368,11 +503,11 @@ export default function OrderHistory() {
                   else if (page <= 3) pageNum = i + 1;
                   else if (page >= totalPages - 2) pageNum = totalPages - 4 + i;
                   else pageNum = page - 2 + i;
-                  
+
                   return (
                     <button
                       key={pageNum}
-                      onClick={() => setPage(pageNum)}
+                      onClick={() => handlePageChange(pageNum)}
                       className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                         page === pageNum ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"
                       }`}
@@ -382,7 +517,7 @@ export default function OrderHistory() {
                   );
                 })}
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
                   className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >

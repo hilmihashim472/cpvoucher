@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Mail, Lock, Eye, EyeOff, User, Check } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, Check, Star } from "lucide-react";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -21,6 +21,12 @@ const FEATURES = [
   "Completely free to join",
   "Instant access to 300+ vouchers",
   "No hidden fees, ever",
+];
+
+const STATS = [
+  { value: "300+", label: "Brand Partners" },
+  { value: "50K+", label: "Smart Shoppers" },
+  { value: "1M+", label: "Vouchers Redeemed" },
 ];
 
 function validate(form, agreed) {
@@ -93,29 +99,60 @@ export default function Register() {
     <div className="auth-shell">
       {/* Left branding panel */}
       <div className="auth-left">
-        <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-logo-img auth-logo-img-white" />
-        <div>
-          <h1 className="auth-left-title">Join thousands of smart shoppers.</h1>
-          <p className="auth-left-subtitle">
-            Create your free account and start saving today.
-          </p>
-          <ul className="auth-feature-list">
-            {FEATURES.map((feature) => (
-              <li key={feature} className="auth-feature-item">
-                <span className="auth-feature-check" aria-hidden="true">
-                  <Check className="h-3.5 w-3.5" />
-                </span>
-                {feature}
-              </li>
-            ))}
-          </ul>
-          <div className="auth-testimonial">
-            <p className="auth-testimonial-text">
-              &ldquo;Best voucher platform I&apos;ve ever used. Signing up took under
-              a minute and I instantly found deals I didn&apos;t know existed.&rdquo;
+        <div className="auth-left-blob-tl" />
+        <div className="auth-left-blob-br" />
+        <div className="auth-left-blob-mid" />
+        <div className="auth-left-inner">
+          <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-logo-img auth-logo-img-white" />
+
+          <div className="auth-left-content">
+            <h1 className="auth-left-title">
+              Join thousands of <span className="auth-left-highlight">smart shoppers</span>.
+            </h1>
+            <p className="auth-left-subtitle">
+              Create your free account and start saving today.
             </p>
-            <p className="auth-testimonial-author">— Daniel Lim, Penang</p>
+
+            <div className="auth-stats-row">
+              {STATS.map(({ value, label }) => (
+                <div key={label} className="auth-stat">
+                  <span className="auth-stat-value">{value}</span>
+                  <span className="auth-stat-label">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <ul className="auth-feature-list">
+              {FEATURES.map((feature) => (
+                <li key={feature} className="auth-feature-item">
+                  <span className="auth-feature-check" aria-hidden="true">
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <div className="auth-testimonial">
+              <div className="auth-testimonial-stars">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <p className="auth-testimonial-text">
+                &ldquo;Best voucher platform I&apos;ve ever used. Signing up took under a minute and I instantly found deals I didn&apos;t know existed.&rdquo;
+              </p>
+              <div className="auth-testimonial-footer">
+                <div className="auth-testimonial-avatar">D</div>
+                <div>
+                  <p className="auth-testimonial-name">Daniel Lim</p>
+                  <p className="auth-testimonial-location">Penang</p>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <p className="auth-left-copyright">© {new Date().getFullYear()} Carter Bank Berhad. All rights reserved.</p>
         </div>
       </div>
 

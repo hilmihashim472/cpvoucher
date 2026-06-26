@@ -33,6 +33,11 @@ body {
   scrollbar-width: none;
 }
 
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes pulse-bg {
   0%,
   100% {
@@ -146,7 +151,7 @@ body {
   @apply shadow-md;
 }
 .voucher-card-image {
-  @apply relative h-36 w-full shrink-0 overflow-hidden;
+  @apply relative h-24 w-full shrink-0 overflow-hidden sm:h-36;
 }
 .voucher-card-img {
   @apply h-full w-full object-cover;
@@ -155,19 +160,19 @@ body {
   @apply flex h-full w-full items-center justify-center;
 }
 .voucher-card-img-initial {
-  @apply text-4xl font-extrabold opacity-60;
+  @apply text-2xl font-extrabold opacity-60 sm:text-4xl;
 }
 .voucher-card-badge-overlay {
-  @apply absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+  @apply absolute right-1.5 top-1.5 rounded-full px-2 py-0.5 text-xs font-semibold sm:right-2.5 sm:top-2.5 sm:px-2.5 sm:py-1;
 }
 .voucher-card-body {
-  @apply flex flex-col flex-1 p-5;
+  @apply flex flex-col flex-1 p-3 sm:p-5;
 }
 .voucher-card-top-row {
   @apply flex items-center justify-between gap-2;
 }
 .voucher-card-category-tag {
-  @apply inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary;
+  @apply inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary sm:px-2.5 sm:py-1;
 }
 .voucher-card-category-tag-icon {
   @apply h-3 w-3;
@@ -182,28 +187,28 @@ body {
   @apply bg-accent/10 text-accent;
 }
 .voucher-card-brand-row {
-  @apply mt-4 flex items-center gap-3;
+  @apply mt-2 flex items-center gap-2 sm:mt-4 sm:gap-3;
 }
 .voucher-card-brand-icon {
-  @apply flex h-10 w-10 items-center justify-center rounded-lg bg-surface text-sm font-bold text-ink;
+  @apply flex h-7 w-7 items-center justify-center rounded-lg bg-surface text-xs font-bold text-ink sm:h-10 sm:w-10 sm:text-sm;
 }
 .voucher-card-brand-name {
-  @apply text-sm font-semibold text-muted;
+  @apply text-xs font-semibold text-muted sm:text-sm;
 }
 .voucher-card-title {
-  @apply mt-3 text-base font-bold text-ink;
+  @apply mt-1.5 text-sm font-bold text-ink sm:mt-3 sm:text-base;
 }
 .voucher-card-description {
-  @apply mt-1 text-sm text-muted line-clamp-2;
+  @apply mt-0.5 text-xs text-muted line-clamp-1 sm:mt-1 sm:text-sm sm:line-clamp-2;
 }
 .voucher-card-footer {
-  @apply mt-4 flex items-center justify-between gap-3 border-t border-line pt-4;
+  @apply mt-2 flex items-center justify-between gap-2 border-t border-line pt-2 sm:mt-4 sm:gap-3 sm:pt-4;
 }
 .voucher-card-points-label {
   @apply mt-1 text-xs text-muted;
 }
 .voucher-card-cta {
-  @apply rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors;
+  @apply rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors sm:px-4 sm:py-2 sm:text-sm;
 }
 .voucher-card-cta:hover {
   @apply bg-accent/90;
@@ -214,10 +219,10 @@ body {
   @apply border-t border-line bg-white;
 }
 .footer-inner {
-  @apply mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8;
+  @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
 }
 .footer-grid {
-  @apply grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4;
+  @apply grid grid-cols-1 gap-4;
 }
 .footer-brand-name {
   @apply text-xl font-extrabold text-primary;
@@ -229,7 +234,7 @@ body {
   @apply h-20 w-auto;
 }
 .footer-brand-tagline {
-  @apply mt-3 max-w-xs text-sm text-muted;
+  @apply mt-1 max-w-xs text-sm text-muted;
 }
 .footer-heading {
   @apply text-sm font-semibold text-ink;
@@ -259,7 +264,7 @@ body {
   @apply bg-primary/90;
 }
 .footer-copyright {
-  @apply mt-10 border-t border-line pt-6 text-center text-sm text-muted;
+  @apply mt-6 border-t border-line pt-4 text-center text-sm text-muted;
 }
 
 /* ===== components/Navbar.jsx ===== */
@@ -267,16 +272,16 @@ body {
   @apply sticky top-0 z-40 border-b border-line bg-white;
 }
 .navbar-inner {
-  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  @apply mx-auto max-w-7xl px-3 sm:px-6 lg:px-8;
 }
 .navbar-bar {
-  @apply flex h-16 items-center justify-between gap-4;
+  @apply flex h-16 items-center justify-between gap-2 sm:gap-4;
 }
 .navbar-logo {
   @apply shrink-0 flex items-center;
 }
 .navbar-logo-img {
-  @apply h-10 w-auto;
+  @apply h-8 w-auto sm:h-10;
 }
 .navbar-logo-text {
   @apply text-xl font-extrabold text-primary;
@@ -327,7 +332,7 @@ body {
   @apply absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent px-1 text-[11px] font-semibold text-white;
 }
 .navbar-avatar {
-  @apply hidden h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-white sm:flex;
+  @apply hidden h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-white sm:flex cursor-pointer transition-all ring-2 ring-transparent hover:ring-primary hover:ring-offset-2 hover:scale-105;
 }
 .navbar-avatar-image {
   @apply h-full w-full object-cover;
@@ -410,13 +415,13 @@ body {
 
 /* ===== components/Navbar.jsx - Points Badge ===== */
 .navbar-points-badge {
-  @apply inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 px-3 py-1.5 border border-amber-300 shadow-sm;
+  @apply inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 px-2 py-1 sm:gap-1.5 sm:px-3 sm:py-1.5 border border-amber-300 shadow-sm;
 }
 .navbar-points-icon {
-  @apply h-4 w-4 text-amber-600;
+  @apply h-4 w-4 shrink-0 text-amber-600;
 }
 .navbar-points-text {
-  @apply text-sm font-bold text-amber-700 whitespace-nowrap;
+  @apply text-xs sm:text-sm font-bold text-amber-700 whitespace-nowrap;
 }
 
 /* ===== components/BottomNav.jsx ===== */
@@ -508,23 +513,24 @@ body {
 /* ===== Shared page layout (Home, VoucherDetail, Cart, VoucherHistory) ===== */
 .page-shell {
   @apply flex min-h-screen flex-col bg-surface;
+  overflow-x: clip;
 }
 
 /* ===== pages/user/Home.jsx ===== */
 .home-hero {
-  @apply bg-navy;
+  background: linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%);
 }
 .home-hero-inner {
-  @apply mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24;
+  @apply mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24;
 }
 .home-hero-content {
   @apply max-w-2xl;
 }
 .home-hero-title {
-  @apply text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl;
+  @apply text-2xl font-extrabold text-white sm:text-4xl lg:text-5xl;
 }
 .home-hero-subtitle {
-  @apply mt-4 text-base text-slate-300 sm:text-lg;
+  @apply mt-2 text-sm text-slate-300 sm:mt-4 sm:text-lg;
 }
 .home-hero-form {
   @apply mt-8 flex flex-col gap-3 sm:flex-row;
@@ -571,7 +577,12 @@ body {
   @apply underline;
 }
 .home-trending-grid {
-  @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3;
+  @apply mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3;
+}
+@media (max-width: 639px) {
+  .home-trending-grid > *:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
 }
 .home-trending-full-width {
   @apply sm:col-span-2 lg:col-span-3;
@@ -649,7 +660,7 @@ body {
   @apply font-medium text-ink;
 }
 .voucher-detail-section {
-  @apply mt-6;
+  @apply mt-6 sm:mt-10;
 }
 .voucher-detail-grid {
   @apply mt-6 grid grid-cols-1 gap-8 lg:grid-cols-5;
@@ -757,7 +768,7 @@ body {
   @apply mt-2 text-sm text-muted;
 }
 .voucher-detail-code-section {
-  @apply mt-6;
+  @apply mt-6 sm:mt-10;
 }
 .voucher-detail-code-label {
   @apply text-xs font-semibold uppercase tracking-wide text-muted;
@@ -835,13 +846,13 @@ body {
 }
 
 .cart-skeleton-item {
-  @apply flex gap-4 rounded-xl border border-line bg-white p-4;
+  @apply flex rounded-xl border border-line bg-white overflow-hidden;
 }
 .cart-skeleton-image {
-  @apply h-20 w-20 shrink-0 animate-pulse rounded-lg bg-line;
+  @apply h-32 w-28 shrink-0 animate-pulse bg-line sm:w-36;
 }
 .cart-skeleton-info {
-  @apply flex-1 space-y-2;
+  @apply flex-1 space-y-2 p-4;
 }
 .cart-skeleton-line-1 {
   @apply h-4 w-1/3 animate-pulse rounded bg-line;
@@ -861,49 +872,55 @@ body {
 }
 
 .cart-item {
-  @apply flex flex-col gap-4 rounded-xl border border-line bg-white p-4 sm:flex-row;
+  @apply flex flex-row rounded-xl border border-line bg-white overflow-hidden;
 }
 .cart-item-icon {
-  @apply flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-surface text-lg font-bold text-ink;
+  @apply flex w-20 shrink-0 self-stretch items-center justify-center bg-surface text-xl font-bold text-ink sm:w-36 sm:text-2xl;
+}
+.cart-item-img {
+  @apply h-full w-full object-cover;
 }
 .cart-item-info {
-  @apply flex-1;
+  @apply flex flex-row flex-1 gap-2 p-3 sm:gap-3 sm:py-4 sm:pl-4 sm:pr-4;
+}
+.cart-item-text {
+  @apply flex-1 min-w-0;
 }
 .cart-item-tags {
-  @apply flex flex-wrap items-center gap-2;
+  @apply flex flex-wrap items-center gap-1.5;
 }
 .cart-item-category-tag {
-  @apply inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary;
+  @apply inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary sm:px-2.5 sm:py-1;
 }
 .cart-item-expiring-tag {
-  @apply inline-flex items-center rounded-full bg-danger/10 px-2.5 py-1 text-xs font-semibold text-danger;
+  @apply inline-flex items-center rounded-full bg-danger/10 px-2 py-0.5 text-xs font-semibold text-danger sm:px-2.5 sm:py-1;
 }
 .cart-item-title {
-  @apply mt-2 text-base font-bold text-ink;
+  @apply mt-1.5 text-sm font-bold text-ink sm:mt-2 sm:text-base;
 }
 .cart-item-description {
-  @apply mt-1 text-sm text-muted line-clamp-2;
+  @apply hidden sm:block mt-1 text-sm text-muted line-clamp-2;
 }
 .cart-item-price {
-  @apply mt-2 text-sm font-semibold text-ink;
+  @apply mt-1 text-xs font-semibold text-ink sm:mt-2 sm:text-sm;
 }
 .cart-item-actions {
-  @apply flex flex-row items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-between;
+  @apply flex flex-col items-end justify-between py-0.5 sm:py-1;
 }
 .cart-quantity-control {
-  @apply flex items-center gap-2 rounded-lg border border-line;
+  @apply flex items-center gap-1 rounded-lg border border-line px-0.5 py-0.5 sm:gap-2 sm:px-1 sm:py-1;
 }
 .cart-quantity-button {
-  @apply flex h-8 w-8 items-center justify-center text-muted;
+  @apply flex h-7 w-7 items-center justify-center rounded-md text-muted hover:bg-surface sm:h-8 sm:w-8;
 }
 .cart-quantity-button:hover {
   @apply text-ink;
 }
 .cart-quantity-value {
-  @apply w-6 text-center text-sm font-semibold text-ink;
+  @apply w-5 text-center text-xs font-semibold text-ink sm:w-6 sm:text-sm;
 }
 .cart-remove-button {
-  @apply rounded-lg p-2 text-muted;
+  @apply rounded-lg p-2 text-muted sm:p-2.5;
 }
 .cart-remove-button:hover {
   @apply bg-danger/10 text-danger;
@@ -947,7 +964,7 @@ body {
   @apply text-2xl font-extrabold text-primary;
 }
 .cart-processing-section {
-  @apply mt-6;
+  @apply mt-6 sm:mt-10;
 }
 .cart-processing-header {
   @apply flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-muted;
@@ -1149,7 +1166,8 @@ body {
 }
 
 .history-upgrade-banner {
-  @apply mt-8 overflow-hidden rounded-2xl bg-navy p-8 sm:p-10;
+  @apply mt-8 overflow-hidden rounded-2xl p-8 sm:p-10;
+  background: linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%);
 }
 .history-upgrade-tag {
   @apply inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-white;
@@ -1319,7 +1337,7 @@ body {
 
 /* ===== pages/admin/AnalyticsReports.jsx ===== */
 .analytics-header {
-  @apply flex flex-wrap items-center justify-between gap-4;
+  @apply flex flex-wrap items-center justify-between gap-4 pt-4 sm:pt-0;
 }
 .analytics-title {
   @apply text-2xl font-bold text-ink;
@@ -1493,12 +1511,13 @@ body {
 /* ===== admin shell ===== */
 .admin-shell {
   @apply flex min-h-screen bg-surface;
+  overflow-x: clip;
 }
 .admin-content {
   @apply flex min-w-0 flex-1 flex-col pt-14 pb-16 lg:pt-0 lg:pb-0;
 }
 .admin-main {
-  @apply mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden;
+  @apply mx-auto w-full max-w-7xl flex-1 space-y-3 px-4 pt-6 pb-4 sm:px-6 lg:px-8 lg:pt-8;
 }
 .admin-footer {
   @apply border-t border-line bg-white px-4 py-4 sm:px-6 lg:px-8;
@@ -1878,10 +1897,15 @@ body {
 
 /* ===== pages/user/Categories.jsx ===== */
 .cat-grid-wrapper {
-  @apply overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+  @apply relative -mx-4 px-4 sm:mx-0 sm:px-0;
+}
+.cat-grid-wrapper::after {
+  content: '';
+  @apply absolute right-0 top-0 h-full w-10 pointer-events-none sm:hidden;
+  background: linear-gradient(to right, transparent, white);
 }
 .cat-vouchers-section {
-  @apply mt-10;
+  @apply mt-6 sm:mt-10;
 }
 .cat-vouchers-header {
   @apply flex items-end justify-between gap-4;
@@ -1893,39 +1917,46 @@ body {
   @apply mt-0.5 text-sm text-muted;
 }
 .cat-vouchers-grid {
-  @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3;
+  @apply mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3;
 }
 .cat-full-width {
-  @apply sm:col-span-2 lg:col-span-3;
+  @apply col-span-2 lg:col-span-3;
 }
 .cat-hero {
-  @apply bg-navy;
+  background: linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%);
 }
 .cat-hero-inner {
-  @apply mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8;
+  @apply mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-12 lg:px-8;
 }
 .cat-hero-title {
-  @apply text-3xl font-extrabold text-white sm:text-4xl;
+  @apply text-xl font-extrabold text-white sm:text-4xl;
 }
 .cat-hero-subtitle {
-  @apply mt-2 text-base text-slate-300;
+  @apply mt-1 text-sm text-slate-300 sm:mt-2 sm:text-base;
 }
 .cat-main {
-  @apply mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8;
+  @apply mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-10 lg:px-8;
 }
 .cat-grid {
-  @apply flex gap-4 overflow-x-auto scroll-smooth pb-2;
+  @apply flex gap-2 sm:gap-4 overflow-x-auto scroll-smooth pb-4 sm:pb-2;
   scroll-snap-type: x mandatory;
-  -ms-overflow-style: none;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
 .cat-grid::-webkit-scrollbar {
   display: none;
 }
 
+/* Custom scroll indicator */
+.cat-scroll-track {
+  @apply relative mx-auto mt-2 h-1 w-16 rounded-full bg-primary/15;
+}
+.cat-scroll-thumb {
+  @apply absolute top-0 h-full rounded-full bg-primary;
+}
+
 .cat-card {
-  @apply flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-line bg-white p-5 text-center transition-all flex-shrink-0 w-40;
+  @apply flex cursor-pointer flex-col items-center gap-1.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-line bg-white p-3 sm:p-5 text-center transition-all flex-shrink-0 w-24 sm:w-40;
   scroll-snap-align: start;
 }
 
@@ -1938,7 +1969,7 @@ body {
 }
 
 .cat-card-icon {
-  @apply flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary;
+  @apply flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-primary/10 text-primary;
 }
 
 .cat-card-icon-active {
@@ -1946,14 +1977,14 @@ body {
 }
 
 .cat-card-name {
-  @apply text-sm font-semibold text-ink;
+  @apply text-xs font-semibold text-ink leading-tight sm:text-sm;
 }
 
 .cat-card-count {
   @apply text-xs text-muted;
 }
 .cat-vouchers-section {
-  @apply mt-10;
+  @apply mt-6 sm:mt-10;
 }
 .cat-vouchers-header {
   @apply flex items-end justify-between gap-4;
@@ -1965,10 +1996,10 @@ body {
   @apply mt-0.5 text-sm text-muted;
 }
 .cat-vouchers-grid {
-  @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3;
+  @apply mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3;
 }
 .cat-full-width {
-  @apply sm:col-span-2 lg:col-span-3;
+  @apply col-span-2 lg:col-span-3;
 }
 
 .cat-sort-controls {
@@ -2011,10 +2042,15 @@ body {
 
 /* Ensure pagination stays at bottom of section */
 .cat-vouchers-section {
-  @apply mt-10 flex flex-col;
+  @apply mt-6 sm:mt-10 flex flex-col;
 }
 .cat-vouchers-grid {
-  @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 flex-1;
+  @apply mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 flex-1;
+}
+@media (max-width: 639px) {
+  .cat-vouchers-grid > *:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
 }
 
 /* ===== pages/user/ProfileUser.jsx ===== */
@@ -2088,7 +2124,7 @@ body {
   @apply mt-1 text-sm text-muted;
 }
 .profile-section {
-  @apply mt-6;
+  @apply mt-6 sm:mt-10;
 }
 .profile-section-title {
   @apply mb-4 text-base font-bold text-ink;
@@ -2177,7 +2213,26 @@ body {
   @apply flex min-h-screen;
 }
 .auth-left {
-  @apply hidden flex-col justify-between bg-navy px-10 py-12 lg:flex lg:w-1/2;
+  @apply hidden lg:flex lg:w-1/2 relative overflow-hidden;
+  background: linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%);
+}
+.auth-left-blob-tl {
+  @apply absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full pointer-events-none;
+  background: radial-gradient(circle, rgba(96,165,250,0.18) 0%, transparent 70%);
+}
+.auth-left-blob-br {
+  @apply absolute -bottom-40 -right-28 h-96 w-96 rounded-full pointer-events-none;
+  background: radial-gradient(circle, rgba(129,140,248,0.15) 0%, transparent 70%);
+}
+.auth-left-blob-mid {
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full pointer-events-none;
+  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+}
+.auth-left-inner {
+  @apply relative z-10 flex flex-col justify-between px-10 py-12 h-full w-full;
+}
+.auth-left-content {
+  @apply flex-1 flex flex-col justify-center;
 }
 .auth-logo-group {
   @apply flex flex-col items-start gap-2;
@@ -2186,7 +2241,7 @@ body {
   @apply mb-8 flex flex-col items-center gap-2 lg:hidden;
 }
 .auth-logo-img {
-  @apply h-28 w-auto;
+  @apply h-24 w-auto;
 }
 .auth-logo-img-white {
   @apply brightness-0 invert;
@@ -2195,28 +2250,63 @@ body {
   @apply text-2xl font-extrabold text-white;
 }
 .auth-left-title {
-  @apply text-3xl font-extrabold leading-tight text-white sm:text-4xl;
+  @apply text-3xl font-extrabold leading-tight text-white xl:text-4xl;
+}
+.auth-left-highlight {
+  @apply text-blue-300;
 }
 .auth-left-subtitle {
-  @apply mt-4 text-base text-slate-300;
+  @apply mt-3 text-base text-slate-300/90 leading-relaxed;
 }
+/* Stats strip */
+.auth-stats-row {
+  @apply mt-8 flex gap-6 border-t border-white/10 pt-6;
+}
+.auth-stat {
+  @apply flex flex-col;
+}
+.auth-stat-value {
+  @apply text-2xl font-extrabold text-white;
+}
+.auth-stat-label {
+  @apply text-xs text-slate-400 mt-0.5;
+}
+/* Feature list */
 .auth-feature-list {
-  @apply mt-8 space-y-3;
+  @apply mt-7 space-y-3;
 }
 .auth-feature-item {
   @apply flex items-center gap-3 text-sm text-slate-300;
 }
 .auth-feature-check {
-  @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success/20 text-success;
+  @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30;
 }
+/* Testimonial card */
 .auth-testimonial {
-  @apply mt-10 rounded-2xl border border-white/10 bg-white/5 p-5;
+  @apply mt-8 rounded-2xl border border-white/10 p-5;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(8px);
+}
+.auth-testimonial-stars {
+  @apply flex gap-0.5 mb-3;
 }
 .auth-testimonial-text {
-  @apply text-sm italic text-slate-300;
+  @apply text-sm italic text-slate-300 leading-relaxed;
 }
-.auth-testimonial-author {
-  @apply mt-3 text-xs font-semibold text-white;
+.auth-testimonial-footer {
+  @apply mt-4 flex items-center gap-3;
+}
+.auth-testimonial-avatar {
+  @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white ring-2 ring-white/20;
+}
+.auth-testimonial-name {
+  @apply text-sm font-semibold text-white;
+}
+.auth-testimonial-location {
+  @apply text-xs text-slate-400;
+}
+.auth-left-copyright {
+  @apply text-xs text-white/25 mt-8;
 }
 .auth-right {
   @apply flex flex-1 flex-col items-center justify-center bg-surface px-6 py-12;
@@ -2880,7 +2970,8 @@ body {
 
 /* ===== pages/shared/Landing.jsx ===== */
 .landing-page {
-  @apply min-h-screen bg-white;
+  @apply flex min-h-screen flex-col bg-white;
+  overflow-x: clip;
 }
 .landing-nav {
   @apply sticky top-0 z-40 border-b border-line bg-white/80 backdrop-blur;
@@ -2895,20 +2986,21 @@ body {
   @apply flex items-center gap-4;
 }
 .landing-nav-link {
-  @apply text-sm font-medium text-muted;
+  @apply text-sm font-medium text-muted transition-colors;
 }
 .landing-nav-link:hover {
   @apply text-ink;
 }
 .landing-nav-button {
-  @apply rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white;
+  @apply rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white whitespace-nowrap;
 }
 .landing-nav-button:hover {
   @apply bg-primary/90;
 }
 
 .landing-hero {
-  @apply bg-navy;
+  @apply relative overflow-hidden;
+  background: linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%);
 }
 .landing-hero-inner {
   @apply mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-28;
@@ -2968,7 +3060,7 @@ body {
   @apply text-sm font-semibold text-muted;
 }
 .landing-hero-card-body {
-  @apply mt-6;
+  @apply mt-6 sm:mt-10;
 }
 .landing-hero-card-title {
   @apply text-xl font-bold text-ink;
@@ -3084,13 +3176,14 @@ body {
 }
 
 .landing-footer {
-  @apply border-t border-line bg-navy py-12;
+  @apply border-t border-white/10 py-8;
+  background: linear-gradient(150deg, #020408 0%, #0c1a3a 50%, #1a3570 100%);
 }
 .landing-footer-inner {
   @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
 }
 .landing-footer-brand {
-  @apply mb-8;
+  @apply mb-4;
 }
 .landing-footer-logo {
   @apply text-xl font-extrabold text-white;
@@ -3114,7 +3207,7 @@ body {
   @apply text-white;
 }
 .landing-footer-bottom {
-  @apply mt-12 border-t border-white/10 pt-8 text-center;
+  @apply mt-6 border-t border-white/10 pt-5 text-center;
 }
 .landing-footer-copyright {
   @apply text-sm text-slate-400;

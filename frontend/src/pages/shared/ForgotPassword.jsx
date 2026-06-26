@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Mail, ArrowLeft, Check, ShieldCheck } from "lucide-react";
+import { Mail, ArrowLeft, Check, ShieldCheck, Star } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.jsx";
 
 const FEATURES = [
   "Reset link sent within seconds",
   "Link expires after 15 minutes",
   "Your account stays secure",
+];
+
+const STATS = [
+  { value: "< 1min", label: "Avg. Recovery" },
+  { value: "256-bit", label: "Encryption" },
+  { value: "99.9%", label: "Uptime" },
 ];
 
 function validate(email) {
@@ -83,30 +89,60 @@ export default function ForgotPassword() {
     <div className="auth-shell">
       {/* Left branding panel */}
       <div className="auth-left">
-        <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-logo-img auth-logo-img-white" />
-        <div>
-          <h1 className="auth-left-title">Locked out? We've got you covered.</h1>
-          <p className="auth-left-subtitle">
-            Enter your email and we'll send you a secure link to reset your
-            password in seconds.
-          </p>
-          <ul className="auth-feature-list">
-            {FEATURES.map((feature) => (
-              <li key={feature} className="auth-feature-item">
-                <span className="auth-feature-check" aria-hidden="true">
-                  <Check className="h-3.5 w-3.5" />
-                </span>
-                {feature}
-              </li>
-            ))}
-          </ul>
-          <div className="auth-testimonial">
-            <p className="auth-testimonial-text">
-              &ldquo;Recovered my account in under a minute. Super smooth
-              process — the reset email arrived instantly.&rdquo;
+        <div className="auth-left-blob-tl" />
+        <div className="auth-left-blob-br" />
+        <div className="auth-left-blob-mid" />
+        <div className="auth-left-inner">
+          <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="auth-logo-img auth-logo-img-white" />
+
+          <div className="auth-left-content">
+            <h1 className="auth-left-title">
+              Locked out? We&apos;ve got you <span className="auth-left-highlight">covered</span>.
+            </h1>
+            <p className="auth-left-subtitle">
+              Enter your email and we&apos;ll send you a secure link to reset your password in seconds.
             </p>
-            <p className="auth-testimonial-author">— Amir Hassan, Johor Bahru</p>
+
+            <div className="auth-stats-row">
+              {STATS.map(({ value, label }) => (
+                <div key={label} className="auth-stat">
+                  <span className="auth-stat-value">{value}</span>
+                  <span className="auth-stat-label">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <ul className="auth-feature-list">
+              {FEATURES.map((feature) => (
+                <li key={feature} className="auth-feature-item">
+                  <span className="auth-feature-check" aria-hidden="true">
+                    <Check className="h-3.5 w-3.5" />
+                  </span>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            <div className="auth-testimonial">
+              <div className="auth-testimonial-stars">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <p className="auth-testimonial-text">
+                &ldquo;Recovered my account in under a minute. Super smooth process — the reset email arrived instantly.&rdquo;
+              </p>
+              <div className="auth-testimonial-footer">
+                <div className="auth-testimonial-avatar">A</div>
+                <div>
+                  <p className="auth-testimonial-name">Amir Hassan</p>
+                  <p className="auth-testimonial-location">Johor Bahru</p>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <p className="auth-left-copyright">© {new Date().getFullYear()} Carter Bank Berhad. All rights reserved.</p>
         </div>
       </div>
 

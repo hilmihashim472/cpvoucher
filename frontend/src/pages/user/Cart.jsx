@@ -141,50 +141,55 @@ export default function Cart() {
                   return (
                     <div key={id} className="cart-item">
                       <div className="cart-item-icon" aria-hidden="true">
-                        {voucher.brand?.charAt(0)}
+                        {voucher.image
+                          ? <img src={voucher.image} alt={voucher.title} className="cart-item-img" />
+                          : voucher.brand?.charAt(0)
+                        }
                       </div>
                       <div className="cart-item-info">
-                        <div className="cart-item-tags">
-                          <span className="cart-item-category-tag">
-                            {voucher.category?.name || "General"}
-                          </span>
+                        <div className="cart-item-text">
+                          <div className="cart-item-tags">
+                            <span className="cart-item-category-tag">
+                              {voucher.category?.name || "General"}
+                            </span>
+                          </div>
+                          <h3 className="cart-item-title">{voucher.title}</h3>
+                          <p className="cart-item-description">{voucher.description}</p>
+                          <p className="cart-item-price">
+                            {Number(voucher.points ?? 0).toLocaleString()} pts per unit
+                          </p>
                         </div>
-                        <h3 className="cart-item-title">{voucher.title}</h3>
-                        <p className="cart-item-description">{voucher.description}</p>
-                        <p className="cart-item-price">
-                          {Number(voucher.points ?? 0).toLocaleString()} pts per unit
-                        </p>
-                      </div>
-                      <div className="cart-item-actions">
-                        <div className="cart-quantity-control">
+                        <div className="cart-item-actions">
+                          <div className="cart-quantity-control">
+                            <button
+                              type="button"
+                              aria-label={`Decrease quantity of ${item.title}`}
+                              onClick={() => updateQuantity(id, -1)}
+                              disabled={isUpdating || (item.quantity ?? 1) <= 1}
+                              className="cart-quantity-button"
+                            >
+                              <Minus className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                            <span className="cart-quantity-value">{item.quantity ?? 1}</span>
+                            <button
+                              type="button"
+                              aria-label={`Increase quantity of ${item.title}`}
+                              onClick={() => updateQuantity(id, 1)}
+                              disabled={isUpdating}
+                              className="cart-quantity-button"
+                            >
+                              <Plus className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                          </div>
                           <button
                             type="button"
-                            aria-label={`Decrease quantity of ${item.title}`}
-                            onClick={() => updateQuantity(id, -1)}
-                            disabled={isUpdating || (item.quantity ?? 1) <= 1}
-                            className="cart-quantity-button"
+                            aria-label={`Remove ${item.title} from cart`}
+                            onClick={() => removeItem(id)}
+                            className="cart-remove-button"
                           >
-                            <Minus className="h-4 w-4" aria-hidden="true" />
-                          </button>
-                          <span className="cart-quantity-value">{item.quantity ?? 1}</span>
-                          <button
-                            type="button"
-                            aria-label={`Increase quantity of ${item.title}`}
-                            onClick={() => updateQuantity(id, 1)}
-                            disabled={isUpdating}
-                            className="cart-quantity-button"
-                          >
-                            <Plus className="h-4 w-4" aria-hidden="true" />
+                            <Trash2 className="h-5 w-5" aria-hidden="true" />
                           </button>
                         </div>
-                        <button
-                          type="button"
-                          aria-label={`Remove ${item.title} from cart`}
-                          onClick={() => removeItem(id)}
-                          className="cart-remove-button"
-                        >
-                          <Trash2 className="h-5 w-5" aria-hidden="true" />
-                        </button>
                       </div>
                     </div>
                   );

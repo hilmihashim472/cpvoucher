@@ -76,12 +76,13 @@ export default function Landing() {
               Login
             </Link>
             <Link to="/register" className="landing-nav-button">
-              Sign Up Free
+              Sign Up<span className="hidden sm:inline"> Free</span>
             </Link>
           </nav>
         </div>
       </header>
 
+      <main className="flex-1">
       {/* Hero Section */}
       <section className="landing-hero">
         <div className="landing-hero-inner">
@@ -212,6 +213,8 @@ export default function Landing() {
           </Link>
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="landing-footer">

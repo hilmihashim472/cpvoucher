@@ -12,7 +12,7 @@ const ACTIVITY_BORDER_STYLES = {
 
 export default function SystemOverview() {
   const { api } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState({
     totalUsers: 0,
@@ -53,16 +53,95 @@ export default function SystemOverview() {
   const totalCompleted = 0;
   const totalPending = 0;
   const kpiStats = [
-    { label: "Total Users", value: kpis.totalUsers, delta: `${kpis.activeUsers} active`, icon: Users },
-    { label: "Total Unique Orders", value: kpis.totalOrders, delta: "All time", icon: ShoppingBag },
-    { label: "Total Vouchers", value: kpis.totalVouchers, delta: `${kpis.activeVouchers} active`, icon: Ticket },
-    { label: "Points Redeemed", value: kpis.totalPointsRedeemed.toLocaleString(), delta: "All time", icon: Star },
+    {
+      label: "Total Users",
+      value: kpis.totalUsers,
+      delta: `${kpis.activeUsers} active`,
+      icon: Users,
+    },
+    {
+      label: "Total Unique Orders",
+      value: kpis.totalOrders,
+      delta: "All time",
+      icon: ShoppingBag,
+    },
+    {
+      label: "Total Vouchers",
+      value: kpis.totalVouchers,
+      delta: `${kpis.activeVouchers} active`,
+      icon: Ticket,
+    },
+    {
+      label: "Points Redeemed",
+      value: kpis.totalPointsRedeemed.toLocaleString(),
+      delta: "All time",
+      icon: Star,
+    },
   ];
 
   if (loading) {
     return (
-      <section className="p-6">
-        <p className="text-gray-500">Loading dashboard...</p>
+      <section className="animate-pulse">
+        {/* Header skeleton */}
+        <div className="system-header">
+          <div className="space-y-2">
+            <div className="h-7 w-48 rounded-lg bg-gray-200" />
+            <div className="h-4 w-72 rounded-lg bg-gray-100" />
+          </div>
+          <div className="h-8 w-28 rounded-full bg-gray-200" />
+        </div>
+
+        {/* KPI cards skeleton */}
+        <div className="system-kpi-grid">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="system-kpi-card">
+              <div className="h-9 w-9 rounded-xl bg-gray-200 shrink-0" />
+              <div className="space-y-1.5 flex-1">
+                <div className="h-5 w-16 rounded bg-gray-200" />
+                <div className="h-3.5 w-24 rounded bg-gray-100" />
+                <div className="h-3 w-16 rounded bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Two-column skeleton */}
+        <div className="system-columns">
+          {/* Recent Orders skeleton */}
+          <div className="system-left-column">
+            <div className="system-card space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-5 w-32 rounded bg-gray-200" />
+                <div className="h-4 w-14 rounded bg-gray-100" />
+              </div>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-gray-200 shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 w-32 rounded bg-gray-200" />
+                    <div className="h-3 w-24 rounded bg-gray-100" />
+                  </div>
+                  <div className="h-7 w-7 rounded-lg bg-gray-100 shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Activity skeleton */}
+          <div className="system-card space-y-4">
+            <div className="h-5 w-36 rounded bg-gray-200" />
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-xl border-l-4 border-gray-200 pl-3 space-y-1.5 py-1">
+                <div className="flex items-center justify-between">
+                  <div className="h-3.5 w-40 rounded bg-gray-200" />
+                  <div className="h-3 w-12 rounded bg-gray-100" />
+                </div>
+                <div className="h-3 w-28 rounded bg-gray-100" />
+                <div className="h-3 w-10 rounded bg-gray-100" />
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     );
   }
@@ -72,16 +151,15 @@ export default function SystemOverview() {
       <div className="system-header">
         <div>
           <h1 className="system-title">System Overview</h1>
-          <p className="system-subtitle">Real-time snapshot of platform health and activity.</p>
+          <p className="system-subtitle">
+            Real-time snapshot of platform health and activity.
+          </p>
         </div>
         <div className="system-header-actions">
           <span className="system-live-badge">
             <span className="system-live-dot" aria-hidden="true" />
             System Live
           </span>
-          <button type="button" aria-label="View notifications" className="system-notification-button">
-            <Bell className="h-5 w-5" aria-hidden="true" />
-          </button>
         </div>
       </div>
 
@@ -149,7 +227,6 @@ export default function SystemOverview() {
               ))}
             </ul>
           </div>
-
         </div>
 
         {/* Right column - Recent Activity */}
@@ -160,12 +237,19 @@ export default function SystemOverview() {
               <li className="system-merchant-empty">No recent activity.</li>
             )}
             {recentActivity.map((entry) => (
-              <li key={entry.id} className={`system-audit-item ${ACTIVITY_BORDER_STYLES[entry.status] || "system-audit-item-primary"}`}>
+              <li
+                key={entry.id}
+                className={`system-audit-item ${ACTIVITY_BORDER_STYLES[entry.status] || "system-audit-item-primary"}`}
+              >
                 <div className="system-audit-header">
-                  <p className="system-audit-title">{entry.user} purchased {entry.voucher}</p>
+                  <p className="system-audit-title">
+                    {entry.user} purchased {entry.voucher}
+                  </p>
                   <span className="system-audit-time">{entry.time}</span>
                 </div>
-                <p className="system-audit-body">{entry.points} points redeemed</p>
+                <p className="system-audit-body">
+                  {entry.points} points redeemed
+                </p>
                 <div className="system-audit-footer">
                   <span className="system-audit-type">Order</span>
                 </div>

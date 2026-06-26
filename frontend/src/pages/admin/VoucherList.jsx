@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -224,6 +224,12 @@ export default function VoucherList() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, [debouncedSearch, statusFilter, sortField, sortOrder]);
 
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pagination.page]);
+
   /* ── Sort ── */
   const handleSort = (field) => {
     if (sortField === field) {
@@ -296,7 +302,7 @@ export default function VoucherList() {
       <Sidebar />
 
       <div className="admin-content">
-        <main className="admin-main p-6 lg:p-8 space-y-6">
+        <main className="admin-main">
           {/* ── HEADER ── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -316,7 +322,7 @@ export default function VoucherList() {
           </div>
 
           {/* ── STATS ROW ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               {
                 label: "Active",
@@ -345,7 +351,7 @@ export default function VoucherList() {
             ].map((s) => (
               <div
                 key={s.label}
-                className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm"
+                className="bg-white rounded-2xl border border-gray-100 p-3 lg:p-4 flex items-center gap-3 shadow-sm"
               >
                 <div className={`p-2.5 rounded-xl ${s.color}`}>
                   <s.icon className="h-5 w-5" />
@@ -359,7 +365,7 @@ export default function VoucherList() {
           </div>
 
           {/* ── TOOLBAR ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 lg:p-4 flex flex-col md:flex-row md:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
@@ -387,8 +393,104 @@ export default function VoucherList() {
             </div>
           </div>
 
+          {/* ── MOBILE CARDS ── */}
+          <div className="sm:hidden space-y-3">
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="animate-pulse bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="h-4 w-40 bg-gray-200 rounded" />
+                  <div className="h-3 w-24 bg-gray-100 rounded" />
+                  <div className="h-3 w-full bg-gray-100 rounded" />
+                </div>
+              ))
+            ) : vouchers.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-4 bg-gray-100 rounded-2xl"><Ticket className="h-8 w-8 text-gray-400" /></div>
+                  <p className="text-sm font-medium text-gray-500">No vouchers found</p>
+                  <p className="text-xs text-gray-400">Try adjusting your search or filters</p>
+                </div>
+              </div>
+            ) : (
+              vouchers.map((v) => {
+                const status = getVoucherStatus(v);
+                const isUsed = v.usageCount > 0;
+                return (
+                  <div key={v._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{v.title}</p>
+                        <p className="text-xs text-gray-500 font-mono mt-0.5">{v.code}</p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => handleView(v)}
+                          className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <Link to={`/admin/vouchers/add?id=${v._id}`}
+                          className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors">
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                        <button onClick={() => openDeleteModal(v)} disabled={isUsed}
+                          className={`p-2 rounded-lg transition-colors ${isUsed ? "text-gray-300 cursor-not-allowed" : "text-gray-400 hover:text-red-600 hover:bg-red-50"}`}>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-700">
+                        {v.category_id?.name || "General"}
+                      </span>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${STATUS_STYLES[status]}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT_COLORS[status]}`} />
+                        {status === "fully-claimed" ? "Fully Claimed" : status.charAt(0).toUpperCase() + status.slice(1)}
+                      </span>
+                    </div>
+                    <div className="mt-3 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Points</span>
+                        <span className="text-gray-700 font-medium">{v.points.toLocaleString()} pts</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Brand</span>
+                        <span className="text-gray-700 font-medium">{v.brand}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Claimed</span>
+                        <span className="text-gray-700 font-medium">{v.usageCount}/{v.quantity}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Expires</span>
+                        <span className="text-gray-700 font-medium">{v.expiresAt ? new Date(v.expiresAt).toLocaleDateString() : "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            {!loading && pagination.totalPages > 0 && (
+              <div className="cat-pagination">
+                <button onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))} disabled={pagination.page === 1} className="cat-pagination-button">Previous</button>
+                <div className="cat-pagination-pages">
+                  {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                    let pg;
+                    if (pagination.totalPages <= 5) pg = i + 1;
+                    else if (pagination.page <= 3) pg = i + 1;
+                    else if (pagination.page >= pagination.totalPages - 2) pg = pagination.totalPages - 4 + i;
+                    else pg = pagination.page - 2 + i;
+                    return (
+                      <button key={pg} onClick={() => setPagination((p) => ({ ...p, page: pg }))}
+                        className={`cat-pagination-page ${pg === pagination.page ? "cat-pagination-active" : "cat-pagination-inactive"}`}>{pg}</button>
+                    );
+                  })}
+                </div>
+                <button onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))} disabled={pagination.page === pagination.totalPages} className="cat-pagination-button">Next</button>
+              </div>
+            )}
+          </div>
+
           {/* ── TABLE ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="hidden sm:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

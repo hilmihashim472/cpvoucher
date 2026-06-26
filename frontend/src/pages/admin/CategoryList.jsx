@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Search, Plus, Pencil, Trash2, X, Tag, Layers, CheckCircle2,
@@ -180,6 +180,12 @@ export default function CategoryList() {
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
   useEffect(() => { setPagination((p) => ({ ...p, page: 1 })); }, [debouncedSearch, activeFilter, sortField, sortOrder]);
 
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pagination.page]);
+
   /* ── Sort ── */
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -250,7 +256,7 @@ export default function CategoryList() {
       <Sidebar />
 
       <div className="admin-content">
-        <main className="admin-main p-6 lg:p-8 space-y-6">
+        <main className="admin-main">
 
           {/* ── HEADER ── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -268,13 +274,13 @@ export default function CategoryList() {
           </div>
 
           {/* ── STATS ROW ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { label: "Total Categories", value: pagination.total, icon: Layers, color: "text-blue-600 bg-blue-50" },
               { label: "Active", value: totalActive, icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50" },
               { label: "Drafts", value: totalDraft, icon: FileText, color: "text-amber-600 bg-amber-50" },
-            ].map((s) => (
-              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+            ].map((s, i, arr) => (
+              <div key={s.label} className={`bg-white rounded-2xl border border-gray-100 p-3 lg:p-4 flex items-center gap-3 shadow-sm${i === arr.length - 1 && arr.length % 2 !== 0 ? " col-span-2 sm:col-span-1" : ""}`}>
                 <div className={`p-2.5 rounded-xl ${s.color}`}>
                   <s.icon className="h-5 w-5" />
                 </div>
@@ -287,7 +293,7 @@ export default function CategoryList() {
           </div>
 
           {/* ── TOOLBAR ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 lg:p-4 flex flex-col md:flex-row md:items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
@@ -313,8 +319,89 @@ export default function CategoryList() {
             </div>
           </div>
 
+          {/* ── MOBILE CARDS ── */}
+          <div className="sm:hidden space-y-3">
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="animate-pulse bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gray-200" />
+                    <div className="space-y-1.5 flex-1">
+                      <div className="h-4 w-32 bg-gray-200 rounded" />
+                      <div className="h-3 w-48 bg-gray-100 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : categories.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-4 bg-gray-100 rounded-2xl"><Tag className="h-8 w-8 text-gray-400" /></div>
+                  <p className="text-sm font-medium text-gray-500">No categories found</p>
+                  <p className="text-xs text-gray-400">Try adjusting your search or filters</p>
+                </div>
+              </div>
+            ) : (
+              categories.map((cat) => (
+                <div key={cat._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm"
+                        style={{ backgroundColor: `${cat.color || "#F97316"}20` }}>
+                        {getEmoji(cat.icon)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{cat.description || "No description"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => openEdit(cat)}
+                        className="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => openDelete(cat)} disabled={cat.voucherCount > 0}
+                        className={`p-2 rounded-lg transition-colors ${cat.voucherCount > 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-400 hover:text-red-600 hover:bg-red-50"}`}>
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-600">
+                      <Layers className="h-3.5 w-3.5 text-gray-400" />
+                      {cat.voucherCount.toLocaleString()} vouchers
+                    </span>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${cat.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${cat.status === "active" ? "bg-emerald-500" : "bg-amber-500"}`} />
+                      {cat.status.charAt(0).toUpperCase() + cat.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+            {!loading && pagination.totalPages > 0 && (
+              <div className="cat-pagination">
+                <button onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))} disabled={pagination.page === 1} className="cat-pagination-button">Previous</button>
+                <div className="cat-pagination-pages">
+                  {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                    let pg;
+                    if (pagination.totalPages <= 5) pg = i + 1;
+                    else if (pagination.page <= 3) pg = i + 1;
+                    else if (pagination.page >= pagination.totalPages - 2) pg = pagination.totalPages - 4 + i;
+                    else pg = pagination.page - 2 + i;
+                    return (
+                      <button key={pg} onClick={() => setPagination((p) => ({ ...p, page: pg }))}
+                        className={`cat-pagination-page ${pg === pagination.page ? "cat-pagination-active" : "cat-pagination-inactive"}`}>{pg}</button>
+                    );
+                  })}
+                </div>
+                <button onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))} disabled={pagination.page === pagination.totalPages} className="cat-pagination-button">Next</button>
+              </div>
+            )}
+          </div>
+
           {/* ── TABLE ── */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="hidden sm:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, Coins, User, LogOut } from "lucide-react";
+import { Search, ShoppingCart, Coins, User, LogOut, X } from "lucide-react";
 import { useAuth } from "../hooks/useAuth.jsx";
 import BottomNav from "./BottomNav";
 
@@ -23,6 +23,8 @@ export default function Navbar({ variant = "default" }) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const mobileSearchRef = useRef(null);
 
   const isActive = (to) =>
     to === "/" ? pathname === "/" : pathname.startsWith(to);
@@ -50,6 +52,25 @@ export default function Navbar({ variant = "default" }) {
     window.addEventListener("cartUpdated", loadCartCount);
     return () => window.removeEventListener("cartUpdated", loadCartCount);
   }, [loadCartCount, variant]);
+
+  // Auto-focus mobile search input when opened
+  useEffect(() => {
+    if (mobileSearchOpen && mobileSearchRef.current) {
+      mobileSearchRef.current.focus();
+    }
+  }, [mobileSearchOpen]);
+
+  // Close mobile search when route changes
+  useEffect(() => {
+    setMobileSearchOpen(false);
+  }, [pathname]);
+
+  const handleSearchSubmit = (query) => {
+    const q = query.trim();
+    navigate(q ? `/categories?search=${encodeURIComponent(q)}` : "/categories");
+    setMobileSearchOpen(false);
+    setSearchQuery("");
+  };
 
   const links = variant === "default" ? NAV_LINKS : SIMPLE_NAV_LINKS;
 
@@ -97,12 +118,7 @@ export default function Navbar({ variant = "default" }) {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        const query = searchQuery.trim();
-                        navigate(
-                          query
-                            ? `/categories?search=${encodeURIComponent(query)}`
-                            : "/categories",
-                        );
+                        handleSearchSubmit(searchQuery);
                       }
                     }}
                     className="navbar-search-input"
@@ -124,6 +140,19 @@ export default function Navbar({ variant = "default" }) {
                       {(user?.points ?? 0).toLocaleString()} pts
                     </span>
                   </div>
+
+                  {/* Mobile search icon — hidden on desktop */}
+                  <button
+                    type="button"
+                    onClick={() => setMobileSearchOpen((o) => !o)}
+                    aria-label={mobileSearchOpen ? "Close search" : "Open search"}
+                    className="md:hidden p-2 rounded-lg text-muted hover:text-ink hover:bg-surface transition-colors"
+                  >
+                    {mobileSearchOpen
+                      ? <X className="h-5 w-5" aria-hidden="true" />
+                      : <Search className="h-5 w-5" aria-hidden="true" />
+                    }
+                  </button>
 
                   {/* Cart + Avatar — desktop only (bottom nav handles mobile) */}
                   <div className="hidden lg:flex items-center gap-3">
@@ -213,6 +242,32 @@ export default function Navbar({ variant = "default" }) {
               )}
             </div>
           </div>
+
+          {/* Mobile search panel — slides down when open */}
+          {variant === "default" && mobileSearchOpen && (
+            <div className="md:hidden pb-3 px-1 animate-[slideDown_150ms_ease-out]">
+              <label className="navbar-search-label">
+                <span className="sr-only">Search vouchers</span>
+                <Search className="navbar-search-icon" aria-hidden="true" />
+                <input
+                  ref={mobileSearchRef}
+                  type="search"
+                  placeholder="Search vouchers, brands..."
+                  defaultValue=""
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSearchSubmit(e.currentTarget.value);
+                    }
+                    if (e.key === "Escape") {
+                      setMobileSearchOpen(false);
+                    }
+                  }}
+                  className="navbar-search-input"
+                />
+              </label>
+            </div>
+          )}
         </div>
       </header>
 

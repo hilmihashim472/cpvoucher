@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { label: "Vouchers", icon: Ticket, to: "/admin/vouchers" },
   { label: "Order History", icon: ShoppingBag, to: "/admin/orders" },
   { label: "Users", icon: Users, to: "/admin/users" },
-  { label: "Profile", icon: User, to: "/admin/profile" },
+  { label: "My Profile", icon: User, to: "/admin/profile" },
 ];
 
 const AVATAR_GRADIENTS = [
@@ -40,7 +40,8 @@ const AVATAR_GRADIENTS = [
 const getGradient = (name) => {
   if (!name) return AVATAR_GRADIENTS[0];
   let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < name.length; i++)
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
 };
 
@@ -59,7 +60,9 @@ export default function Sidebar() {
   // Prevent body scroll when mobile sidebar is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   const isActive = (to) =>
@@ -111,8 +114,14 @@ export default function Sidebar() {
         <div className="flex items-start justify-between px-6 pt-5 pb-4">
           <div className="flex-1 flex flex-col items-center gap-1">
             <Link to="/admin" className="flex flex-col items-center gap-1">
-              <img src="/cbvnavbar.svg" alt="Carter Bank Voucher" className="h-9 w-auto" />
-              <span className="text-xs font-extrabold tracking-tight text-[#1a56db]">Administrator</span>
+              <img
+                src="/cbvnavbar.svg"
+                alt="Carter Bank Voucher"
+                className="h-9 w-auto"
+              />
+              <span className="text-xs font-extrabold tracking-tight text-[#1a56db]">
+                Administrator
+              </span>
             </Link>
           </div>
           {/* Mobile close button */}
@@ -130,19 +139,23 @@ export default function Sidebar() {
         {/* ── PROFILE CARD ── */}
         <div className="px-4 py-5 border-b border-gray-100">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-            {user?.profile_picture ? (
+            {user?.profilePicture ? (
               <img
-                src={user.profile_picture}
+                src={user.profilePicture}
                 alt={displayName}
                 className="w-11 h-11 rounded-xl object-cover ring-2 ring-white shadow-sm"
               />
             ) : (
-              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getGradient(displayName)} flex items-center justify-center text-white font-bold text-lg shadow-sm ring-2 ring-white`}>
+              <div
+                className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getGradient(displayName)} flex items-center justify-center text-white font-bold text-lg shadow-sm ring-2 ring-white`}
+              >
                 {avatarInitial}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {displayName}
+              </p>
               <p className="text-xs text-gray-500 truncate">{displayEmail}</p>
             </div>
             <Link
@@ -156,7 +169,10 @@ export default function Sidebar() {
         </div>
 
         {/* ── NAVIGATION ── */}
-        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1" aria-label="Admin navigation">
+        <nav
+          className="flex-1 overflow-y-auto px-4 py-4 space-y-1"
+          aria-label="Admin navigation"
+        >
           {NAV_ITEMS.map(({ label, icon: Icon, to }) => {
             const active = isActive(to);
             return (
@@ -166,13 +182,16 @@ export default function Sidebar() {
                 aria-current={active ? "page" : undefined}
                 className={`
                   group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all
-                  ${active
-                    ? "sidebar-nav-link-active"
-                    : "sidebar-nav-link-inactive"
+                  ${
+                    active
+                      ? "sidebar-nav-link-active"
+                      : "sidebar-nav-link-inactive"
                   }
                 `}
               >
-                <Icon className={`h-4.5 w-4.5 transition-colors ${active ? "text-white-600" : "text-gray-400 group-hover:text-gray-600"}`} />
+                <Icon
+                  className={`h-4.5 w-4.5 transition-colors ${active ? "text-white-600" : "text-gray-400 group-hover:text-gray-600"}`}
+                />
                 <span>{label}</span>
                 {active && (
                   <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600" />

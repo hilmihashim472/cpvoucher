@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Sparkles,
@@ -70,6 +70,33 @@ export default function Categories() {
   const [error, setError] = useState(null);
   const [categoryCounts, setCategoryCounts] = useState({});
   const [categories, setCategories] = useState([ALL_DEALS]);
+  const gridRef = useRef(null);
+  const thumbRef = useRef(null);
+  const [scrollVisible, setScrollVisible] = useState(false);
+
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const overflows = el.scrollWidth > el.clientWidth;
+      setScrollVisible(overflows);
+      if (!overflows || !thumbRef.current) return;
+      const ratio = el.clientWidth / el.scrollWidth;
+      const thumbW = Math.max(ratio * 100, 15);
+      const thumbL = (el.scrollLeft / (el.scrollWidth - el.clientWidth)) * (100 - thumbW);
+      thumbRef.current.style.width = `${thumbW}%`;
+      thumbRef.current.style.left = `${thumbL}%`;
+    };
+
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [categories]);
 
   const fetchCategories = useCallback(() => {
     api
@@ -115,7 +142,7 @@ export default function Categories() {
     if (sortVal) params.sort = sortVal;
     if (pageNum > 1) params.page = pageNum;
     if (search) params.search = search;
-    params.limit = 9;
+    params.limit = 12;
 
     api
       .get("/vouchers", { params })
@@ -186,6 +213,7 @@ export default function Categories() {
       newParams.set("page", newPage.toString());
     }
     setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -205,7 +233,7 @@ export default function Categories() {
       <main className="cat-main">
         {/* Category cards */}
         <div className="cat-grid-wrapper">
-          <div className="cat-grid" role="list" aria-label="Voucher categories">
+          <div className="cat-grid" ref={gridRef} role="list" aria-label="Voucher categories">
             {categories.map(({ key, icon: Icon, label, color }) => {
               const isActive = activeCategory === key;
               const count = categoryCounts[key];
@@ -240,6 +268,13 @@ export default function Categories() {
               );
             })}
           </div>
+
+          {/* Custom scroll indicator — mobile only, visible only when overflow */}
+          {scrollVisible && (
+            <div className="cat-scroll-track sm:hidden">
+              <div ref={thumbRef} className="cat-scroll-thumb" />
+            </div>
+          )}
         </div>
 
         {/* Vouchers section */}
