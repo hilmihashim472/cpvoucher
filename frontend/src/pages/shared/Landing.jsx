@@ -66,7 +66,7 @@ export default function Landing() {
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <Link to="/" className="landing-logo">
-            Carter Bank Voucher
+            <img src="/cbvnavbar.svg" alt="Carter Bank Voucher" className="h-9 w-auto" />
           </Link>
           <nav className="landing-nav-links">
             {/* <Link to="/categories" className="landing-nav-link">
@@ -217,28 +217,8 @@ export default function Landing() {
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="landing-footer-brand">
-            <p className="landing-footer-logo">Carter Bank Voucher</p>
+            <img src="/cbvlogotext.svg" alt="Carter Bank Voucher" className="h-20 w-auto brightness-0 invert" />
             <p className="landing-footer-tagline">Unlock Premium Savings Everywhere</p>
-          </div>
-          <div className="landing-footer-links">
-            <div className="landing-footer-col">
-              <h4 className="landing-footer-heading">Company</h4>
-              <Link to="/" className="landing-footer-link">About</Link>
-              <Link to="/" className="landing-footer-link">Careers</Link>
-              <Link to="/" className="landing-footer-link">Press</Link>
-            </div>
-            <div className="landing-footer-col">
-              <h4 className="landing-footer-heading">Support</h4>
-              <Link to="/" className="landing-footer-link">Help Center</Link>
-              <Link to="/" className="landing-footer-link">Contact</Link>
-              <Link to="/" className="landing-footer-link">FAQ</Link>
-            </div>
-            <div className="landing-footer-col">
-              <h4 className="landing-footer-heading">Legal</h4>
-              <Link to="/" className="landing-footer-link">Privacy</Link>
-              <Link to="/" className="landing-footer-link">Terms</Link>
-              <Link to="/" className="landing-footer-link">Cookies</Link>
-            </div>
           </div>
           <div className="landing-footer-bottom">
             <p className="landing-footer-copyright">© {new Date().getFullYear()} Carter Bank Berhad. All rights reserved.</p>
