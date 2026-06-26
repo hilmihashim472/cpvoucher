@@ -1,14 +1,5 @@
 import { useState, useEffect } from "react";
 import { Bell, Users, ShoppingBag, Ticket, Star, Eye } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 
@@ -18,16 +9,6 @@ const ACTIVITY_BORDER_STYLES = {
   primary: "system-audit-item-primary",
   warning: "system-audit-item-warning",
 };
-
-// Mock growth projection (you can make this dynamic later)
-const GROWTH_PROJECTION = [
-  { month: "Jan", value: 4000 },
-  { month: "Feb", value: 3000 },
-  { month: "Mar", value: 5000 },
-  { month: "Apr", value: 4500 },
-  { month: "May", value: 6000 },
-  { month: "Jun", value: 5500 },
-];
 
 export default function SystemOverview() {
   const { api } = useAuth();
@@ -167,23 +148,6 @@ export default function SystemOverview() {
             </ul>
           </div>
 
-          <div className="system-growth-card">
-            <h2 className="system-growth-title">Growth Projection</h2>
-            <p className="system-growth-subtitle">
-              Projected points redemption volume over the next 6 months.
-            </p>
-            <div className="system-growth-chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={GROWTH_PROJECTION}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                  <XAxis dataKey="month" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: "#1E293B", border: "none", borderRadius: 8, color: "#fff" }} />
-                  <Bar dataKey="value" fill="#F97316" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
         </div>
 
         {/* Right column - Recent Activity */}

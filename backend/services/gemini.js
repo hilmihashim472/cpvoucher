@@ -16,8 +16,8 @@ Requirements:
 - Return ONLY the description text, nothing else`;
 
     const result = await model.generateContent(prompt);
-    const response = result.response;
-    const description = response.text().trim();
+    //const response = result.response;
+    const description = result.response.text().trim();
 
     return description;
   } catch (error) {

@@ -1244,19 +1244,6 @@ body {
   @apply bg-success/10;
 }
 
-.system-growth-card {
-  @apply rounded-2xl bg-navy p-5;
-}
-.system-growth-title {
-  @apply text-base font-bold text-white;
-}
-.system-growth-subtitle {
-  @apply mt-1 text-xs text-slate-300;
-}
-.system-growth-chart {
-  @apply mt-4 h-56;
-}
-
 .system-audit-list {
   @apply mt-4 space-y-3;
 }

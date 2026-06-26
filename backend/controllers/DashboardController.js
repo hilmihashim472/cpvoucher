@@ -134,7 +134,7 @@ exports.getStats = async (req, res) => {
         user: order.user?.fullName || order.user?.username || "Unknown",
         voucher: order.voucher?.title || "Unknown Voucher",
         points: order.pointsUsed || 0,
-        time: new Date(order.createdAt).toLocaleString(),
+        time: new Date(order.timestamp).toLocaleString(),
         status: "completed",
       })),
       recentOrders: recentOrdersList.map((order) => ({
@@ -143,7 +143,7 @@ exports.getStats = async (req, res) => {
         user: order.user?.fullName || order.user?.username || "Unknown",
         voucher: order.voucher?.title || "Unknown Voucher",
         points: order.pointsUsed || 0,
-        time: new Date(order.createdAt).toLocaleString(),
+        time: new Date(order.timestamp).toLocaleString(),
         receiptUrl: order.receiptUrl,
       })),
     });

@@ -123,61 +123,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Expiring soon banner */}
-      <section className="home-expiring">
-        <div className="home-expiring-grid">
-          <div className="home-expiring-content">
-            <span className="home-expiring-tag">Limited time</span>
-            <h2 className="home-expiring-title">Final Hours to Redeem.</h2>
-            <p className="home-expiring-description">
-              These featured offers are about to run out. Grab your voucher
-              code now before stock runs dry and points reset.
-            </p>
-            <a href="#trending-vouchers" className="home-expiring-cta">
-              Show Countdown Deals
-            </a>
-          </div>
-
-          <div className="home-partners-grid">
-            {FEATURED_PARTNERS.map((partner) => {
-              const percentLeft = Math.round((partner.remaining / partner.total) * 100);
-              return (
-                <div key={partner.name} className="home-partner-card">
-                  <p className="home-partner-name">{partner.name}</p>
-                  <div className="home-partner-code-row">
-                    <code className="home-partner-code">{partner.code}</code>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyCode(partner.code)}
-                      aria-label={`Copy voucher code for ${partner.name}`}
-                      className="home-partner-copy-button"
-                    >
-                      {copiedCode === partner.code ? (
-                        <>
-                          <Check className="h-3.5 w-3.5" aria-hidden="true" />
-                          Copied
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                          Copy
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="home-partner-progress">
-                    <div className="home-progress-track">
-                      <div className="home-progress-fill" style={{ width: `${percentLeft}%` }} />
-                    </div>
-                    <p className="home-partner-remaining">{partner.remaining} vouchers remaining</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );

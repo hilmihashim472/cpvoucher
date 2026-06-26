@@ -5,6 +5,7 @@ import {
   ShoppingBag,
   Ticket,
   Users,
+  User,
   Tag,
   Menu,
   X,
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { label: "Vouchers", icon: Ticket, to: "/admin/vouchers" },
   { label: "Order History", icon: ShoppingBag, to: "/admin/orders" },
   { label: "Users", icon: Users, to: "/admin/users" },
+  { label: "Profile", icon: User, to: "/admin/profile" },
 ];
 
 const AVATAR_GRADIENTS = [

@@ -71,12 +71,6 @@ export default function AnalyticsReports() {
             Deep dive into platform performance and redemption trends.
           </p>
         </div>
-        <div className="analytics-header-actions">
-          <button type="button" className="analytics-export-button">
-            <Download className="h-4 w-4" aria-hidden="true" />
-            Export Report
-          </button>
-        </div>
       </div>
 
       {/* KPI metric cards */}

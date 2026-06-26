@@ -538,7 +538,7 @@ export default function ProfileUser() {
         {/* Recent orders */}
         <div className="profile-section">
           <h2 className="profile-section-title">Recent Orders</h2>
-          <div className="profile-orders-card">
+          <div className="profile-orders-card p-0">
             <div className="profile-orders-header">
               <span className="profile-orders-title">Last 3 redemptions</span>
               <Link to="/orders-history" className="profile-orders-link">
@@ -546,30 +546,49 @@ export default function ProfileUser() {
               </Link>
             </div>
             {loading ? (
-              <p className="text-muted">Loading orders...</p>
-            ) : recentOrders.length === 0 ? (
-              <p className="text-muted">
-                No orders yet. Start redeeming vouchers!
-              </p>
+              <div className="history-table-loading">
+                <div className="history-table-skeleton-row" />
+                <div className="history-table-skeleton-row" />
+                <div className="history-table-skeleton-row" />
+              </div>
             ) : (
-              recentOrders.map((order) => (
-                <div key={order.id} className="profile-order-row">
-                  <div>
-                    <p className="profile-order-voucher">
-                      {order.voucher}
-                      <span
-                        className={`profile-order-badge ${ORDER_BADGE_STYLES[order.status] ?? "profile-order-badge-used"}`}
-                      >
-                        {order.status}
-                      </span>
-                    </p>
-                    <p className="profile-order-date">{order.date}</p>
-                  </div>
-                  <span className="profile-order-pts">
-                    {order.points.toLocaleString()} pts
-                  </span>
-                </div>
-              ))
+              <div className="history-table-scroll">
+                <table className="history-table">
+                  <thead className="history-table-head">
+                    <tr>
+                      <th className="history-table-head-cell">Voucher</th>
+                      <th className="history-table-head-cell">Date</th>
+                      <th className="history-table-head-cell text-right">Points</th>
+                    </tr>
+                  </thead>
+                  <tbody className="history-table-body">
+                    {recentOrders.length === 0 ? (
+                      <tr>
+                        <td className="history-table-cell text-center" colSpan={3}>
+                          No orders yet. Start redeeming vouchers!
+                        </td>
+                      </tr>
+                    ) : (
+                      recentOrders.map((order) => (
+                        <tr key={order.id}>
+                          <td className="history-table-cell-strong">
+                            {order.voucher}
+                            <span
+                              className={`profile-order-badge ${ORDER_BADGE_STYLES[order.status] ?? "profile-order-badge-used"}`}
+                            >
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="history-table-cell">{order.date}</td>
+                          <td className="history-table-cell text-right">
+                            {order.points.toLocaleString()} pts
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
