@@ -343,7 +343,7 @@ export default function OrderHistory() {
 
         {/* ── MOBILE PAGINATION ── */}
         {!loading && sortedOrders.length > PAGE_SIZE && (
-          <div className="sm:hidden cat-pagination">
+          <div className="sm:hidden mt-8 flex items-center justify-center gap-3">
             <button
               onClick={() => handlePageChange(Math.max(1, page - 1))}
               disabled={page === 1}
