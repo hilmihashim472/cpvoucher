@@ -116,13 +116,16 @@ export default function VoucherCard({
       <p className="voucher-card-description">{description}</p>
 
       <div className="voucher-card-footer">
-        <div>
-          <PointsBadge points={cost} />
-          {pointsLabel && <p className="voucher-card-points-label">{pointsLabel}</p>}
+        <div className="voucher-card-divider" />
+        <div className="voucher-card-footer-row">
+          <div>
+            <PointsBadge points={cost} />
+            {pointsLabel && <p className="voucher-card-points-label">{pointsLabel}</p>}
+          </div>
+          <button type="button" onClick={onGetCode} className="voucher-card-cta">
+            Get Code
+          </button>
         </div>
-        <button type="button" onClick={onGetCode} className="voucher-card-cta">
-          Get Code
-        </button>
       </div>
       </div>
     </article>

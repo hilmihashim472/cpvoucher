@@ -202,13 +202,24 @@ body {
   @apply mt-0.5 text-xs text-muted line-clamp-1 sm:mt-1 sm:text-sm sm:line-clamp-2;
 }
 .voucher-card-footer {
-  @apply mt-2 flex items-center justify-between gap-2 border-t border-line pt-2 sm:mt-4 sm:gap-3 sm:pt-4;
+  @apply mt-auto flex flex-col;
+}
+.voucher-card-divider {
+  @apply mt-2 mb-1 border-t border-line sm:mt-3 sm:mb-2;
+}
+.voucher-card-footer-row {
+  @apply flex items-center justify-between gap-1.5 sm:gap-3;
+}
+.voucher-card-footer .points-badge {
+  @apply px-1.5 py-0.5 sm:px-2.5 sm:py-1;
+  font-size: clamp(9px, 2.8vw, 12px);
 }
 .voucher-card-points-label {
   @apply mt-1 text-xs text-muted;
 }
 .voucher-card-cta {
-  @apply rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors sm:px-4 sm:py-2 sm:text-sm;
+  @apply shrink-0 rounded-lg bg-accent px-2 py-0.5 font-semibold text-white transition-colors sm:px-4 sm:py-2 sm:text-sm;
+  font-size: clamp(9px, 2.8vw, 12px);
 }
 .voucher-card-cta:hover {
   @apply bg-accent/90;
@@ -1908,7 +1919,7 @@ body {
   @apply mt-6 sm:mt-10;
 }
 .cat-vouchers-header {
-  @apply flex items-end justify-between gap-4;
+  @apply flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4;
 }
 .cat-vouchers-title {
   @apply text-xl font-bold text-ink;
@@ -1987,7 +1998,7 @@ body {
   @apply mt-6 sm:mt-10;
 }
 .cat-vouchers-header {
-  @apply flex items-end justify-between gap-4;
+  @apply flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4;
 }
 .cat-vouchers-title {
   @apply text-xl font-bold text-ink;
@@ -2003,13 +2014,13 @@ body {
 }
 
 .cat-sort-controls {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-2 sm:w-auto;
 }
 .cat-sort-label {
-  @apply text-sm font-medium text-muted;
+  @apply shrink-0 text-sm font-medium text-muted;
 }
 .cat-sort-select {
-  @apply rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/30;
+  @apply w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/30 sm:w-auto;
 }
 
 .cat-pagination {
