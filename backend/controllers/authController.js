@@ -17,10 +17,11 @@ const REFRESH_TOKEN_TTL_MS = 1 * 24 * 60 * 60 * 1000; // 1 day
 
 const refreshCookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
+  secure: false,  // Set to true ONLY when you have HTTPS
+  sameSite: "lax",  // Changed from "strict" to "lax"
   maxAge: REFRESH_TOKEN_TTL_MS,
 };
+
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
