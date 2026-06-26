@@ -17,8 +17,13 @@ const generateReceiptPDF = async (orderData, user) => {
     const html = generateReceiptHTML(orderData, user);
 
     const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: "/usr/bin/chromium", // adjust if `which` shows a different path
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      ],
     });
 
     const page = await browser.newPage();
