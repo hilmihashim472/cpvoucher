@@ -205,7 +205,7 @@ body {
   @apply mt-auto flex flex-col;
 }
 .voucher-card-divider {
-  @apply mt-2 mb-1 border-t border-line sm:mt-3 sm:mb-2;
+  @apply mt-2 mb-3 border-t border-line sm:mt-3 sm:mb-5;
 }
 .voucher-card-footer-row {
   @apply flex items-center justify-between gap-1.5 sm:gap-3;
