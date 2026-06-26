@@ -1,4 +1,4 @@
-# 🏦 Carter Bank Voucher Management System
+# 🏦 Carter Bank Voucher Redemption System
 
 A full-stack MERN Voucher Management System that allows users to browse, redeem, and manage vouchers through a points-based rewards system. The platform includes AI-powered voucher description generation, PDF receipt generation, email notifications, analytics dashboards, and comprehensive admin management tools.
 
@@ -185,46 +185,32 @@ npm install
 
 ## 🔐 Environment Variables
 
-### Backend (.env)
+Create `.env` files based on the example files provided:
 
-Create a `.env` file inside the `backend` folder:
+### Backend
 
-```env
-# Database
-MONGO_URI=mongodb://localhost:27017/cpvoucher
+Copy `backend/.env.example` to `backend/.env` and fill in your values:
 
-# JWT
-JWT_SECRET=your_secure_jwt_secret_here
-
-# Environment
-NODE_ENV=development
-
-# URLs
-API_URL=http://localhost:5000
-FRONTEND_URL=http://localhost:5173
-
-# Email (Gmail)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-
-# Google Gemini AI
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.5-flash
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+```bash
+cp backend/.env.example backend/.env
 ```
 
-### Frontend (.env)
+### Frontend
 
-Create a `.env` file inside the `frontend` folder:
+Copy `frontend/.env.example` to `frontend/.env` and fill in your values:
 
-```env
-VITE_API_URL=http://localhost:5000
+```bash
+cp frontend/.env.example frontend/.env
 ```
+
+**Required variables include:**
+- MongoDB connection string
+- JWT secret key
+- Email credentials (Gmail)
+- Google OAuth credentials
+- API URLs
+
+See the `.env.example` files in each folder for the complete list of required variables.
 
 ---
 
