@@ -43,7 +43,7 @@ const STATS = [
 
 const TESTIMONIALS = [
   {
-    quote: "I saved over RM500 in a single month using VoucherHub. It's the best deal platform I've ever used.",
+    quote: "I saved over RM500 in a single month using Carter Bank Voucher. It's the best deal platform I've ever used.",
     author: "Sarah Lim",
     location: "Kuala Lumpur",
   },
@@ -66,7 +66,7 @@ export default function Landing() {
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <Link to="/" className="landing-logo">
-            VoucherHub
+            Carter Bank Voucher
           </Link>
           <nav className="landing-nav-links">
             {/* <Link to="/categories" className="landing-nav-link">
@@ -133,7 +133,7 @@ export default function Landing() {
       <section className="landing-features">
         <div className="landing-features-inner">
           <div className="landing-section-header">
-            <h2 className="landing-section-title">Why Choose VoucherHub?</h2>
+            <h2 className="landing-section-title">Why Choose Carter Bank Voucher?</h2>
             <p className="landing-section-subtitle">
               We make saving money simple, instant, and rewarding.
             </p>
@@ -217,7 +217,7 @@ export default function Landing() {
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="landing-footer-brand">
-            <p className="landing-footer-logo">VoucherHub</p>
+            <p className="landing-footer-logo">Carter Bank Voucher</p>
             <p className="landing-footer-tagline">Unlock Premium Savings Everywhere</p>
           </div>
           <div className="landing-footer-links">
@@ -241,7 +241,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="landing-footer-bottom">
-            <p className="landing-footer-copyright">© {new Date().getFullYear()} VoucherHub. All rights reserved.</p>
+            <p className="landing-footer-copyright">© {new Date().getFullYear()} Carter Bank Berhad. All rights reserved.</p>
           </div>
         </div>
       </footer>

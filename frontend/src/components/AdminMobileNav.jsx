@@ -44,8 +44,8 @@ export default function AdminMobileNav() {
         <div className="amnav-topbar-inner">
           {/* Logo */}
           <Link to="/admin" className="amnav-topbar-logo">
-            <div className="amnav-topbar-logo-icon">VH</div>
-            <span className="amnav-topbar-logo-text">VoucherHub</span>
+            <div className="amnav-topbar-logo-icon">CB</div>
+            <span className="amnav-topbar-logo-text">Carter Bank Voucher Administration</span>
           </Link>
 
           {/* Profile link */}

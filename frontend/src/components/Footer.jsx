@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-grid">
           <div>
-            <span className="footer-brand-name">VoucherHub</span>
+            <span className="footer-brand-name">Carter Bank Voucher</span>
             <p className="footer-brand-tagline">
               Your one-stop marketplace for redeeming reward points on the best
               deals from top brands worldwide.
@@ -64,7 +64,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-copyright">
-          © {new Date().getFullYear()} VoucherHub. All rights reserved.
+          © {new Date().getFullYear()} Carter Bank Berhad. All rights reserved.
         </div>
       </div>
     </footer>

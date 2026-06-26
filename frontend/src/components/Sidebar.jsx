@@ -113,7 +113,7 @@ export default function Sidebar() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-600/25">
               VH
             </div>
-            <span className="text-lg font-bold text-gray-900 tracking-tight">VoucherHub</span>
+            <span className="text-lg font-bold text-gray-900 tracking-tight">Carter Bank Voucher</span>
           </Link>
           {/* Mobile close button */}
           <button

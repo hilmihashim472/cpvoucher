@@ -11,7 +11,7 @@ const sendReceiptEmail = async (user, orderData, pdfPath) => {
     const { orderNumber } = orderData;
 
     const mailOptions = {
-      from: `"VoucherHub" <${process.env.EMAIL_USER}>`,
+      from: `"Carter Bank Voucher" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: `Redemption Confirmed: #${orderNumber}`,
       html: generateEmailHTML(orderData, user),
@@ -41,9 +41,9 @@ const sendReceiptEmail = async (user, orderData, pdfPath) => {
 const sendResetEmail = async (user, resetLink) => {
   try {
     const mailOptions = {
-      from: `"VoucherHub" <${process.env.EMAIL_USER}>`,
+      from: `"Carter Bank Voucher" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: "Reset your VoucherHub password",
+      subject: "Reset your Carter Bank Voucher password",
       html: generateResetEmailHTML(user, resetLink),
     };
 
@@ -80,7 +80,7 @@ const generateResetEmailHTML = (user, resetLink) => {
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin-bottom: 24px;">
           <tr>
             <td align="left">
-              <div style="color: ${primaryColor}; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">VoucherHub.</div>
+              <div style="color: ${primaryColor}; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">Carter Bank Voucher</div>
             </td>
             <td align="right">
               <span style="font-size: 12px; font-weight: 600; color: #d97706; background-color: #fffbeb; padding: 4px 12px; border-radius: 99px; text-transform: uppercase;">Reset Password</span>
@@ -92,7 +92,7 @@ const generateResetEmailHTML = (user, resetLink) => {
             <td style="padding: 40px 40px 30px 40px;">
               <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 700; color: ${textColor};">Reset your password.</h1>
               <p style="margin: 0; font-size: 16px; color: ${mutedColor}; line-height: 1.6;">
-                Hi ${user.fullName || user.username}, we received a request to reset your VoucherHub account password. Click the button below to set a new one. This link expires in <strong>15 minutes</strong>.
+                Hi ${user.fullName || user.username}, we received a request to reset your Carter Bank Voucher account password. Click the button below to set a new one. This link expires in <strong>15 minutes</strong>.
               </p>
             </td>
           </tr>
@@ -127,8 +127,8 @@ const generateResetEmailHTML = (user, resetLink) => {
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; padding-top: 30px;">
           <tr>
             <td align="center" style="font-size: 12px; color: ${mutedColor}; line-height: 1.8;">
-              &copy; ${new Date().getFullYear()} VoucherHub Inc. All rights reserved.<br>
-              123 Rewards Plaza, Digital Sector, San Francisco, CA 94103<br>
+              &copy; ${new Date().getFullYear()} Carter Bank Berhad. All rights reserved.<br>
+              5th Floor, Surian Tower, Jln PJU 7/3, Mutiara Damansara, Petaling Jaya, Selangor 47810<br>
               <a href="#" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">Support Center</a> &nbsp;&bull;&nbsp; <a href="#" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">Privacy Policy</a>
             </td>
           </tr>
@@ -175,7 +175,7 @@ const generateEmailHTML = (orderData, user) => {
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin-bottom: 24px;">
           <tr>
             <td align="left">
-              <div style="color: ${primaryColor}; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">VoucherHub.</div>
+              <div style="color: ${primaryColor}; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">Carter Bank Voucher</div>
             </td>
             <td align="right">
               <span style="font-size: 12px; font-weight: 600; color: #059669; background-color: #ecfdf5; padding: 4px 12px; border-radius: 99px; text-transform: uppercase;">Confirmed</span>
@@ -284,8 +284,8 @@ const generateEmailHTML = (orderData, user) => {
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; padding-top: 30px;">
           <tr>
             <td align="center" style="font-size: 12px; color: ${mutedColor}; line-height: 1.8;">
-              &copy; ${new Date().getFullYear()} VoucherHub Inc. All rights reserved.<br>
-              123 Rewards Plaza, Digital Sector, San Francisco, CA 94103<br>
+              &copy; ${new Date().getFullYear()} Carter Bank Berhad. All rights reserved.<br>
+              5th Floor, Surian Tower, Jln PJU 7/3, Mutiara Damansara, Petaling Jaya, Selangor 47810<br>
               <a href="#" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">Support Center</a> &nbsp;&bull;&nbsp; <a href="#" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">Privacy Policy</a>
             </td>
           </tr>

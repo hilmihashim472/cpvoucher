@@ -54,7 +54,7 @@ export default function Navbar({ variant = "default" }) {
           <div className="navbar-bar">
             {/* Logo — always visible */}
             <Link to={variant === "default" ? "/home" : "/"} className="navbar-logo">
-              VoucherHub
+              Carter Bank Voucher
             </Link>
 
             {/* Desktop nav links */}

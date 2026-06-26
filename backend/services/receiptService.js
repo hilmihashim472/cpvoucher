@@ -301,7 +301,7 @@ const generateReceiptHTML = (orderData, user) => {
   <div class="header">
     <div class="logo-area">
       <div class="logo-icon">V</div>
-      <span class="logo-text">VoucherHub.</span>
+      <span class="logo-text">Carter Bank Voucher</span>
     </div>
     <div class="receipt-badge">Invoice ID: #${orderNumber}</div>
   </div>
@@ -373,7 +373,7 @@ const generateReceiptHTML = (orderData, user) => {
   </div>
 
   <div class="footer">
-    <p>Thank you for your business. For support, please contact help@voucherhub.com</p>
+    <p>Thank you for your business. For support, please contact admin at mukhrizbusiness@gmail.com</p>
     <div class="stamp">
       GEN_REF: ${Math.random().toString(36).substring(2, 15).toUpperCase()} | 
       PROCESSED_AT: ${new Date().toISOString()}

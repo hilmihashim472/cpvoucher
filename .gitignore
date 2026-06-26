@@ -79,6 +79,7 @@ GH_TOKEN.txt
 VoucherHub-keypairs.ppk
 *.ppk
 client_secret_*.json
+*.txt
 
 
 # OS generated files

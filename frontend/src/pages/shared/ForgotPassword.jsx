@@ -83,7 +83,7 @@ export default function ForgotPassword() {
     <div className="auth-shell">
       {/* Left branding panel */}
       <div className="auth-left">
-        <span className="auth-left-logo">VoucherHub</span>
+        <span className="auth-left-logo">Carter Bank Voucher</span>
         <div>
           <h1 className="auth-left-title">Locked out? We've got you covered.</h1>
           <p className="auth-left-subtitle">
@@ -112,7 +112,7 @@ export default function ForgotPassword() {
 
       {/* Right form panel */}
       <div className="auth-right">
-        <span className="auth-mobile-logo">VoucherHub</span>
+        <span className="auth-mobile-logo">Carter Bank Voucher</span>
 
         {sent ? (
           <SuccessState email={email} />

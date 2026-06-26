@@ -800,7 +800,7 @@ export default function AddVoucher() {
 
         <footer className="admin-footer">
           <div className="admin-footer-inner">
-            <span>VoucherPro Admin v2.4.1 Build 9982</span>
+            <span>Carter Bank Voucher Capstone Project 2026</span>
             <nav aria-label="Admin footer links" className="admin-footer-nav">
               <a href="#" className="admin-footer-link">Documentation</a>
               <a href="#" className="admin-footer-link">Support Ticket</a>

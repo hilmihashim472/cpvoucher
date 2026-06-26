@@ -79,7 +79,7 @@ export default function Register() {
     try {
       const result = await register(form.name, form.username, form.email, form.password);
       if (result.success) {
-        toast.success("Account created! Welcome to VoucherHub.");
+        toast.success("Account created! Welcome to Carter Bank Voucher.");
         navigate("/home");
       } else {
         toast.error(result.message || "Registration failed. Please try again.");
@@ -93,7 +93,7 @@ export default function Register() {
     <div className="auth-shell">
       {/* Left branding panel */}
       <div className="auth-left">
-        <span className="auth-left-logo">VoucherHub</span>
+        <span className="auth-left-logo">Carter Bank Voucher</span>
         <div>
           <h1 className="auth-left-title">Join thousands of smart shoppers.</h1>
           <p className="auth-left-subtitle">
@@ -121,7 +121,7 @@ export default function Register() {
 
       {/* Right form panel */}
       <div className="auth-right">
-        <span className="auth-mobile-logo">VoucherHub</span>
+        <span className="auth-mobile-logo">Carter Bank Voucher</span>
 
         <div className="auth-card">
           <h2 className="auth-card-title">Create your account</h2>
