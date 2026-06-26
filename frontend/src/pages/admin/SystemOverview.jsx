@@ -92,9 +92,11 @@ export default function SystemOverview() {
             <div className="system-kpi-icon">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </div>
-            <p className="system-kpi-value">{value}</p>
-            <p className="system-kpi-label">{label}</p>
-            <p className="system-kpi-delta">{delta}</p>
+            <div>
+              <p className="system-kpi-value">{value}</p>
+              <p className="system-kpi-label">{label}</p>
+              {delta && <p className="system-kpi-delta">{delta}</p>}
+            </div>
           </div>
         ))}
       </div>

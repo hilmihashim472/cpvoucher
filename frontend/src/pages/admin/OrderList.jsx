@@ -166,16 +166,16 @@ export default function OrderList() {
           </div>
 
           {/* ── STATS ROW ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {[
               { label: "Total Orders", value: pagination.total, icon: ShoppingBag, color: "text-blue-600 bg-blue-50" },
             ].map((s) => (
-              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4 shadow-sm">
-                <div className={`p-3 rounded-xl ${s.color}`}>
+              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+                <div className={`p-2.5 rounded-xl ${s.color}`}>
                   <s.icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{s.value}</p>
+                  <p className="text-xl font-bold text-gray-900">{s.value}</p>
                   <p className="text-xs text-gray-500 font-medium">{s.label}</p>
                 </div>
               </div>

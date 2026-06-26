@@ -1194,19 +1194,19 @@ body {
 }
 
 .system-kpi-grid {
-  @apply mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  @apply mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4;
 }
 .system-kpi-card {
-  @apply rounded-2xl border border-line bg-white p-5;
+  @apply rounded-2xl border border-line bg-white p-4 flex items-center gap-3 shadow-sm;
 }
 .system-kpi-icon {
-  @apply flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary;
+  @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary p-2;
 }
 .system-kpi-value {
-  @apply mt-3 text-2xl font-extrabold text-ink;
+  @apply text-xl font-bold text-ink;
 }
 .system-kpi-label {
-  @apply mt-1 text-sm text-muted;
+  @apply text-xs text-muted font-medium;
 }
 .system-kpi-delta {
   @apply mt-2 text-xs font-semibold text-success;
@@ -1372,19 +1372,19 @@ body {
 }
 
 .analytics-kpi-grid {
-  @apply mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  @apply mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4;
 }
 .analytics-kpi-card {
-  @apply rounded-2xl border border-line bg-white p-5;
+  @apply rounded-2xl border border-line bg-white p-4 shadow-sm;
 }
 .analytics-kpi-label {
-  @apply text-sm text-muted;
+  @apply text-xs text-muted font-medium;
 }
 .analytics-kpi-row {
-  @apply mt-2 flex items-baseline justify-between gap-2;
+  @apply mt-1 flex items-baseline justify-between gap-2;
 }
 .analytics-kpi-value {
-  @apply text-2xl font-extrabold text-ink;
+  @apply text-xl font-bold text-ink;
 }
 .analytics-kpi-delta {
   @apply rounded-full px-2 py-1 text-xs font-semibold;
@@ -1498,7 +1498,7 @@ body {
   @apply flex min-w-0 flex-1 flex-col pt-14 pb-16 lg:pt-0 lg:pb-0;
 }
 .admin-main {
-  @apply mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 sm:px-6 lg:px-8;
+  @apply mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 sm:px-6 lg:px-8 overflow-x-hidden;
 }
 .admin-footer {
   @apply border-t border-line bg-white px-4 py-4 sm:px-6 lg:px-8;
