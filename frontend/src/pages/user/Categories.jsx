@@ -295,6 +295,7 @@ export default function Categories() {
               vouchers.map((voucher) => (
                 <VoucherCard
                   key={voucher._id ?? voucher.id}
+                  image={voucher.image}
                   brand={voucher.brand}
                   category={voucher.category_id?.name}
                   categoryIcon={voucher.category_id?.icon}

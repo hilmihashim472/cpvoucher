@@ -140,10 +140,28 @@ body {
 
 /* ===== components/VoucherCard.jsx ===== */
 .voucher-card {
-  @apply flex flex-col rounded-xl border border-line bg-white p-5 shadow-sm transition-shadow;
+  @apply flex flex-col overflow-hidden rounded-xl border border-line bg-white shadow-sm transition-shadow;
 }
 .voucher-card:hover {
   @apply shadow-md;
+}
+.voucher-card-image {
+  @apply relative h-36 w-full shrink-0 overflow-hidden;
+}
+.voucher-card-img {
+  @apply h-full w-full object-cover;
+}
+.voucher-card-img-placeholder {
+  @apply flex h-full w-full items-center justify-center;
+}
+.voucher-card-img-initial {
+  @apply text-4xl font-extrabold opacity-60;
+}
+.voucher-card-badge-overlay {
+  @apply absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+}
+.voucher-card-body {
+  @apply flex flex-1 flex-col p-5;
 }
 .voucher-card-top-row {
   @apply flex items-center justify-between gap-2;
@@ -164,22 +182,22 @@ body {
   @apply bg-accent/10 text-accent;
 }
 .voucher-card-brand-row {
-  @apply mt-4 flex items-center gap-3;
+  @apply mt-3 flex items-center gap-3;
 }
 .voucher-card-brand-icon {
-  @apply flex h-10 w-10 items-center justify-center rounded-lg bg-surface text-sm font-bold text-ink;
+  @apply flex h-9 w-9 items-center justify-center rounded-lg bg-surface text-sm font-bold text-ink;
 }
 .voucher-card-brand-name {
   @apply text-sm font-semibold text-muted;
 }
 .voucher-card-title {
-  @apply mt-3 text-base font-bold text-ink;
+  @apply mt-2 text-base font-bold text-ink;
 }
 .voucher-card-description {
   @apply mt-1 text-sm text-muted line-clamp-2;
 }
 .voucher-card-footer {
-  @apply mt-4 flex items-center justify-between gap-3 border-t border-line pt-4;
+  @apply mt-auto flex items-center justify-between gap-3 border-t border-line pt-4 mt-4;
 }
 .voucher-card-points-label {
   @apply mt-1 text-xs text-muted;
