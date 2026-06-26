@@ -98,57 +98,141 @@ Generate professional voucher descriptions instantly using Google Gemini.
 ```bash
 cpvoucher/
 │
-├── backend/
-│   ├── config/
-│   │   ├── db.js
-│   │   └── passport.js
-│   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── cartController.js
-│   │   ├── voucherController.js
-│   │   └── ...
-│   ├── middleware/
-│   │   └── auth.js
-│   ├── models/
-│   │   ├── User.js
-│   │   ├── Voucher.js
-│   │   └── ...
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── cartRoutes.js
-│   │   └── ...
-│   ├── services/
-│   │   ├── emailService.js
-│   │   └── receiptService.js
-│   ├── uploads/
-│   │   ├── profiles/
-│   │   └── receipts/
-│   ├── .env.example
-│   ├── package.json
-│   └── server.js
+├── 📁 backend/                            # 🖥️ Express.js REST API Server
+│   │
+│   ├── 📄 .env                            # Environment variables (gitignored)
+│   ├── 📄 .env.example                    # Template for required env vars
+│   ├── 📄 package.json                    # Backend dependencies & scripts
+│   ├── 📄 package-lock.json
+│   ├── 📄 server.js                       # Express app entry point, middleware, routes
+│   ├── 📄 seed.js                         # Database seeder (populates test data)
+│   │
+│   ├── 📁 config/                         # Configuration modules
+│   │   ├── 📄 db.js                       # Mongoose MongoDB connection setup
+│   │   ├── 📄 email.js                    # Nodemailer transporter configuration
+│   │   └── 📄 passport.js                 # Passport.js JWT configuration
+│   │
+│   ├── 📁 middleware/                     # Express middleware
+│   │   ├── 📄 auth.js                     # JWT access/refresh token verification
+│   │   ├── 📄 admin.js                    # Admin role authorization guard
+│   │   └── 📄 upload.js                   # Multer file upload handler (profiles, vouchers, receipts)
+│   │
+│   ├── 📁 models/                         # Mongoose data models
+│   │   ├── 📄 User.js                     # User: name, email, password, role, points, profileImg
+│   │   ├── 📄 Voucher.js                  # Voucher: title, description, points, category, image, stock
+│   │   ├── 📄 Category.js                 # Category: name, description, icon, isActive
+│   │   ├── 📄 CartItem.js                 # Active cart item: user, voucher, quantity, addedAt
+│   │   ├── 📄 CartItemHistory.js          # Redeemed/checked-out cart history record
+│   │   └── 📄 RefreshToken.js             # Refresh token storage for secure rotation
+│   │
+│   ├── 📁 controllers/                    # Route handler logic
+│   │   ├── 📄 authController.js           # Register, login, logout, refresh token, getMe
+│   │   ├── 📄 voucherController.js        # CRUD: create, list, get, update, delete vouchers
+│   │   ├── 📄 categoryController.js       # CRUD: create, list, get, update, delete categories
+│   │   ├── 📄 cartController.js           # Add to cart, remove from cart, checkout (redeem points)
+│   │   ├── 📄 DashboardController.js      # Admin dashboard: stats, charts, user counts, voucher counts
+│   │   ├── 📄 OrderHistoryController.js   # User order/redeem history listing
+│   │   └── 📄 uploadController.js         # Handle file upload requests & responses
+│   │
+│   ├── 📁 routes/                         # Express route definitions
+│   │   ├── 📄 authRoutes.js               # /api/auth/* (register, login, logout, refresh, me)
+│   │   ├── 📄 voucherRoutes.js            # /api/vouchers/* (CRUD + filtering)
+│   │   ├── 📄 categoryRoutes.js           # /api/categories/* (CRUD)
+│   │   ├── 📄 cartRoutes.js               # /api/cart/* (add, remove, checkout, list)
+│   │   ├── 📄 orderHistoryRoutes.js       # /api/orders/* (user history, admin all history)
+│   │   ├── 📄 uploadRoutes.js             # /api/upload/* (file images)
+│   │   └── 📄 adminRoutes.js              # /api/admin/* (protected: dashboard, user management, system)
+│   │
+│   ├── 📁 services/                       # Business logic services
+│   │   ├── 📄 emailService.js             # Send transactional emails (welcome, receipts, notifications)
+│   │   ├── 📄 receiptService.js           # Generate PDF receipts for voucher redemptions
+│   │   └── 📄 gemini.js                   # Google Gemini AI integration (admin analytics/reports)
+│   │
+│   └── 📁 uploads/                        # Uploaded file storage
+│       ├── 📁 profiles/                   # User profile picture uploads
+│       ├── 📁 receipts/                   # Generated PDF receipt files
+│       └── 📁 vouchers/                   # Voucher image uploads
 │
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   ├── config/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── .env.example
-│   ├── package.json
-│   └── vite.config.js
+├── 📁 frontend/                           # 🎨 React 19 + Vite SPA Client
+│   │
+│   ├── 📄 .env                            # Environment variables (gitignored)
+│   ├── 📄 .env.example                    # Template for required frontend env vars
+│   ├── 📄 .gitignore                      # Frontend git ignore rules
+│   ├── 📄 index.html                      # Vite HTML entry point
+│   ├── 📄 package.json                    # Frontend dependencies (React, Tailwind, etc.)
+│   ├── 📄 package-lock.json
+│   ├── 📄 vite.config.js                  # Vite bundler configuration
+│   ├── 📄 eslint.config.js                # ESLint flat config (linting rules)
+│   ├── 📄 README.md
+│   │
+│   ├── 📁 public/                         # Static assets (served as-is)
+│   │   ├── 📄 cbvicon.svg                 # Favicon / app icon
+│   │   ├── 📄 cbvlogo.svg                 # Main logo
+│   │   ├── 📄 cbvlogo2.svg                # Logo variant
+│   │   ├── 📄 cbvlogotext.svg             # Logo with text
+│   │   ├── 📄 cbvnavbar.svg               # Navbar logo
+│   │   ├── 📄 cbvnavbaradmin.svg          # Admin navbar logo
+│   │   └── 📄 icons.svg                   # SVG sprite icons
+│   │
+│   └── 📁 src/                            # Application source code
+│       │
+│       ├── 📄 main.jsx                    # React DOM entry point (BrowserRouter, Providers)
+│       ├── 📄 App.jsx                     # Root component (route definitions)
+│       ├── 📄 index.css                   # Global Tailwind CSS styles
+│       │
+│       ├── 📁 assets/                     # Imported assets (bundled by Vite)
+│       │   ├── 📄 hero.png                # Homepage hero banner image
+│       │   ├── 📄 react.svg               # React logo
+│       │   └── 📄 vite.svg                # Vite logo
+│       │
+│       ├── 📁 config/                     # Client-side configuration
+│       │   └── 📄 api.js                  # Axios instance (base URL, interceptors, auth headers)
+│       │
+│       ├── 📁 hooks/                      # Custom React hooks
+│       │   └── 📄 useAuth.jsx             # Auth context provider & hook (user state, login/logout)
+│       │
+│       ├── 📁 components/                 # 🧩 Reusable UI components
+│       │   ├── 📄 Navbar.jsx              # Top navigation bar (user session, links)
+│       │   ├── 📄 Sidebar.jsx             # Admin sidebar navigation menu
+│       │   ├── 📄 AdminMobileNav.jsx      # Admin mobile bottom/top navigation
+│       │   ├── 📄 BottomNav.jsx           # Mobile bottom navigation bar
+│       │   ├── 📄 Footer.jsx              # Site footer with links
+│       │   ├── 📄 VoucherCard.jsx         # Voucher display card (image, title, points)
+│       │   ├── 📄 CategoryPill.jsx        # Category filter pill button
+│       │   ├── 📄 PointsBadge.jsx         # User points balance display badge
+│       │   ├── 📄 SkeletonCard.jsx        # Loading skeleton placeholder
+│       │   ├── 📄 EmptyState.jsx          # Empty state placeholder (no data message)
+│       │   ├── 📄 InlineError.jsx         # Inline error message component
+│       │   ├── 📄 ProtectedRoute.jsx      # Route guard: redirects unauthenticated users
+│       │   └── 📄 AdminRoute.jsx          # Route guard: restricts to admin role only
+│       │
+│       └── 📁 pages/                      # 📄 Page-level components (one per route)
+│           │
+│           ├── 📁 user/                   # User-facing pages
+│           │   ├── 📄 Home.jsx            # Voucher listing / browse page
+│           │   └── 📄 ProfileUser.jsx     # User profile & settings page
+│           │   # (Other expected pages: Cart, VoucherDetail, Orders, etc.)
+│           │
+│           ├── 📁 admin/                  # Admin panel pages
+│           │   ├── 📄 Dashboard.jsx       # Main admin dashboard overview
+│           │   ├── 📄 UserList.jsx        # User management (list, search, edit)
+│           │   ├── 📄 SystemOverview.jsx  # System stats & health overview
+│           │   └── 📄 AnalyticsReports.jsx# Analytics, charts & AI reports (Gemini)
+│           │   # (Other expected pages: VoucherManagement, CategoryManagement, etc.)
+│           │
+│           └── 📁 shared/                 # Shared/public pages
+│               # (Expected: Login, Register, ForgotPassword, NotFound, etc.)
+|
+├── 📄 .gitignore                          # Git ignored files
+├── 📄 EC2_SETUP_GUIDE.md                  # AWS EC2 deployment instructions
+├── 📄 package.json                        # Root workspace package scripts
+├── 📄 package-lock.json
+├── 📄 README.md                           # Project overview & setup guide
 │
-├── .github/
-│   └── workflows/
-│       └── deploy.yml
-│
-├── EC2_SETUP_GUIDE.md
-├── package.json
-└── README.md
-```
-
+├── 📁 .github/
+│   └── 📁 workflows/
+│       └── 📄 deploy.yml                  # GitHub Actions: auto-deploy to EC2 on push
+└──
 ---
 
 ## ⚙️ Installation
