@@ -1,4 +1,4 @@
-# 🎟️ CP Voucher Management System
+# 🏦 Carter Bank Voucher Management System
 
 A full-stack MERN Voucher Management System that allows users to browse, redeem, and manage vouchers through a points-based rewards system. The platform includes AI-powered voucher description generation, PDF receipt generation, email notifications, analytics dashboards, and comprehensive admin management tools.
 
@@ -9,6 +9,7 @@ A full-stack MERN Voucher Management System that allows users to browse, redeem,
 ### 👤 User Features
 
 - User registration and login with JWT authentication
+- Google OAuth social login
 - Browse vouchers by category
 - Search vouchers by title or description
 - Redeem vouchers using reward points
@@ -36,29 +37,30 @@ A full-stack MERN Voucher Management System that allows users to browse, redeem,
 
 ### Frontend
 
-- React 19
-- Vite
-- React Router DOM
-- React Hook Form
-- Tailwind CSS 4
-- Axios
-- Recharts
-- React Hot Toast
-- Lucide React
+- **React 19** - Core UI framework for building interactive user interfaces
+- **Vite** - Fast build tool and development server
+- **React Router DOM** - Client-side routing and navigation
+- **React Hook Form** - Form state management and validation
+- **Tailwind CSS 4** - Utility-first CSS framework for styling
+- **Axios** - HTTP client for API requests with interceptors
+- **Recharts** - Data visualization and analytics charts
+- **React Hot Toast** - User-friendly notification system
+- **Lucide React** - Icon library for UI elements
 
 ### Backend
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT Authentication
-- Bcrypt
-- Nodemailer
-- Multer
-- Sharp
-- Puppeteer
-- Google Gemini API
+- **Node.js** - JavaScript runtime environment (core architecture)
+- **Express.js** - Web application framework for API routes
+- **MongoDB** - NoSQL database for data storage
+- **Mongoose** - MongoDB object modeling and validation
+- **JWT Authentication** - Secure token-based authentication
+- **Bcrypt** - Password hashing for security
+- **Nodemailer** - Email sending service for notifications
+- **Multer** - File upload middleware for images
+- **Sharp** - High-performance image processing and optimization
+- **Puppeteer** - PDF receipt generation from HTML
+- **Google Gemini API** - AI-powered voucher description generation
+- **Passport.js** - Google OAuth 2.0 authentication strategy
 
 ---
 
@@ -85,7 +87,7 @@ Generate professional voucher descriptions instantly using Google Gemini.
 
 ### Receipt System
 
-- PDF receipt generation
+- PDF receipt generation with Puppeteer
 - Email delivery
 - Downloadable transaction records
 
@@ -98,21 +100,52 @@ cpvoucher/
 │
 ├── backend/
 │   ├── config/
+│   │   ├── db.js
+│   │   └── passport.js
 │   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── cartController.js
+│   │   ├── voucherController.js
+│   │   └── ...
 │   ├── middleware/
+│   │   └── auth.js
 │   ├── models/
+│   │   ├── User.js
+│   │   ├── Voucher.js
+│   │   └── ...
 │   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── cartRoutes.js
+│   │   └── ...
 │   ├── services/
-│   ├── scripts/
-│   └── uploads/
+│   │   ├── emailService.js
+│   │   └── receiptService.js
+│   ├── uploads/
+│   │   ├── profiles/
+│   │   └── receipts/
+│   ├── .env.example
+│   ├── package.json
+│   └── server.js
 │
 ├── frontend/
-│   ├── components/
-│   ├── pages/
-│   ├── hooks/
-│   ├── config/
-│   └── src/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── config/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── package.json
+│   └── vite.config.js
 │
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+│
+├── EC2_SETUP_GUIDE.md
+├── package.json
 └── README.md
 ```
 
@@ -122,9 +155,10 @@ cpvoucher/
 
 ### Prerequisites
 
-- Node.js v18+
-- MongoDB v5+
-- npm
+- Node.js v18+ (v22 recommended)
+- MongoDB v5+ (local or MongoDB Atlas)
+- npm or yarn
+- Git
 
 ### Clone Repository
 
@@ -136,12 +170,10 @@ cd cpvoucher
 ### Install Dependencies
 
 ```bash
+# Install all dependencies (backend + frontend)
 npm run install:all
-```
 
-Or manually:
-
-```bash
+# Or manually:
 cd backend
 npm install
 
@@ -153,24 +185,45 @@ npm install
 
 ## 🔐 Environment Variables
 
-Create a `.env` file inside the `backend` folder.
+### Backend (.env)
+
+Create a `.env` file inside the `backend` folder:
 
 ```env
+# Database
 MONGO_URI=mongodb://localhost:27017/cpvoucher
 
-JWT_SECRET=your_jwt_secret
+# JWT
+JWT_SECRET=your_secure_jwt_secret_here
 
+# Environment
 NODE_ENV=development
 
-FRONTEND_URL=http://localhost:5137
+# URLs
+API_URL=http://localhost:5000
+FRONTEND_URL=http://localhost:5173
 
+# Email (Gmail)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
 
+# Google Gemini AI
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-2.5-flash
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+### Frontend (.env)
+
+Create a `.env` file inside the `frontend` folder:
+
+```env
+VITE_API_URL=http://localhost:5000
 ```
 
 ---
@@ -187,7 +240,7 @@ npm run seed
 ### Sample Accounts
 
 | Role | Email | Password |
-|--------|--------|--------|
+|------|-------|----------|
 | Admin | admin@example.com | password123 |
 | User | john@example.com | password123 |
 
@@ -195,7 +248,9 @@ npm run seed
 
 ## ▶️ Running the Application
 
-### Start Both Frontend & Backend
+### Development Mode
+
+Start both frontend and backend concurrently:
 
 ```bash
 npm run dev
@@ -203,16 +258,33 @@ npm run dev
 
 ### Start Separately
 
-Backend:
+Backend (port 5000):
 
 ```bash
 npm run dev:backend
+# or
+cd backend && npm run dev
 ```
 
-Frontend:
+Frontend (port 5173):
 
 ```bash
 npm run dev:frontend
+# or
+cd frontend && npm run dev
+```
+
+### Production Mode
+
+```bash
+# Backend
+cd backend
+npm start
+
+# Frontend
+cd frontend
+npm run build
+# Serve the dist/ folder with your web server
 ```
 
 ---
@@ -222,45 +294,58 @@ npm run dev:frontend
 ### Authentication
 
 ```http
-POST /api/auth/register
-POST /api/auth/login
-GET  /api/auth/me
-PUT  /api/auth/me
+POST /api/auth/register          - Register new user
+POST /api/auth/login             - Login user
+POST /api/auth/refresh           - Refresh access token
+POST /api/auth/logout            - Logout user
+GET  /api/auth/me                - Get current user
+PUT  /api/auth/me                - Update user profile
+DELETE /api/auth/profile-picture - Remove profile picture
+
+POST /api/auth/forgot-password   - Request password reset
+POST /api/auth/reset-password    - Reset password with token
+
+GET  /api/auth/google            - Google OAuth login
+GET  /api/auth/google/callback   - Google OAuth callback
 ```
 
 ### Vouchers
 
 ```http
-GET /api/vouchers
-GET /api/vouchers/:id
-GET /api/vouchers/category-counts
+GET    /api/vouchers             - Get all vouchers
+GET    /api/vouchers/:id         - Get voucher by ID
+GET    /api/vouchers/category-counts - Get category counts
 ```
 
 ### Cart
 
 ```http
-GET    /api/cart
-POST   /api/cart
-PUT    /api/cart/:id
-DELETE /api/cart/:id
-POST   /api/cart/redeem
-GET    /api/cart/history
+GET    /api/cart                 - Get user's cart
+POST   /api/cart                 - Add item to cart
+PUT    /api/cart/:id             - Update cart item quantity
+DELETE /api/cart/:id             - Remove item from cart
+POST   /api/cart/redeem          - Redeem vouchers
+GET    /api/cart/history         - Get redemption history
 ```
 
 ### Admin
 
 ```http
-GET    /api/admin/vouchers
-POST   /api/admin/vouchers
-PATCH  /api/admin/vouchers/:id
-DELETE /api/admin/vouchers/:id
+GET    /api/admin/vouchers       - Get all vouchers (admin)
+POST   /api/admin/vouchers       - Create voucher (admin)
+PATCH  /api/admin/vouchers/:id   - Update voucher (admin)
+DELETE /api/admin/vouchers/:id   - Delete voucher (admin)
+GET    /api/admin/users          - Get all users (admin)
+PATCH  /api/admin/users/:id      - Update user (admin)
+GET    /api/admin/orders         - Get all orders (admin)
+GET    /api/admin/analytics      - Get analytics data (admin)
 ```
 
 ---
 
 ## 🔒 Security Features
 
-- JWT Authentication
+- JWT Authentication with refresh tokens
 - Password Hashing (bcrypt)
 - Protected Routes
 - Role-Based Access Control (RBAC)
@@ -268,6 +353,8 @@ DELETE /api/admin/vouchers/:id
 - Secure File Upload Handling
 - Environment Variable Protection
 - CORS Configuration
+- HTTPOnly Cookies for refresh tokens
+- Token rotation and family invalidation
 
 ---
 
@@ -277,17 +364,115 @@ DELETE /api/admin/vouchers/:id
 
 ✅ Google Gemini AI Integration
 
-✅ PDF Receipt Generation
+✅ PDF Receipt Generation with Puppeteer
 
-✅ Email Notification System
+✅ Email Notification System with Nodemailer
 
-✅ Dashboard Analytics
+✅ Dashboard Analytics with Recharts
 
 ✅ Image Optimization with Sharp
 
 ✅ Role-Based Authentication
 
-✅ Responsive UI Design
+✅ Google OAuth Social Login
+
+✅ Responsive UI Design with Tailwind CSS
+
+✅ Points-Based Redemption System
+
+---
+
+## 🚀 Deployment
+
+### EC2 Deployment (AWS)
+
+This project includes automated deployment to AWS EC2 using GitHub Actions.
+
+**Prerequisites:**
+- AWS EC2 instance (Ubuntu 22.04)
+- GitHub repository secrets configured
+- Domain name (optional but recommended for Google OAuth)
+
+**Setup Instructions:**
+
+See [EC2_SETUP_GUIDE.md](./EC2_SETUP_GUIDE.md) for detailed deployment instructions.
+
+**Quick Deploy:**
+
+1. Push to `master` branch
+2. GitHub Actions automatically deploys to EC2
+3. Backend runs on PM2 (port 5000)
+4. Nginx serves frontend and proxies API requests
+
+**Manual Deployment:**
+
+```bash
+# On your EC2 instance
+cd ~/cpvoucher
+git pull origin master
+
+# Update backend
+cd backend
+npm install
+pm2 restart cpvoucher-backend
+
+# Update frontend
+cd ../frontend
+npm install
+npm run build
+sudo rm -rf /var/www/html/*
+sudo cp -r dist/* /var/www/html/
+sudo systemctl restart nginx
+```
+
+---
+
+## 🧪 Testing
+
+### Run Backend Tests
+
+```bash
+cd backend
+npm test
+```
+
+### Test Email Locally
+
+Use [MailHog](https://github.com/mailhog/MailHog) or [Ethereal Email](https://ethereal.email/) for testing email functionality without sending real emails.
+
+---
+
+## 📝 Development Notes
+
+### PDF Generation
+
+PDF receipts are generated using Puppeteer. Ensure Chrome/Chromium dependencies are installed on the server:
+
+```bash
+# Ubuntu/Debian
+sudo apt install -y libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2t64 chromium-browser
+```
+
+### Google OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create OAuth 2.0 Client ID
+3. Add authorized redirect URIs:
+   - `http://localhost:5000/api/auth/google/callback` (development)
+   - `https://yourdomain.com/api/auth/google/callback` (production)
+4. Add authorized JavaScript origins:
+   - `http://localhost:5173` (development)
+   - `https://yourdomain.com` (production)
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
@@ -305,17 +490,44 @@ This project is licensed under the ISC License.
 
 ---
 
-## ⭐ Acknowledgements
+## 🙏 Acknowledgements
 
-- MongoDB
-- Express.js
-- React
-- Node.js
-- Google Gemini API
-- Tailwind CSS
-- Puppeteer
-- Sharp
+- [MongoDB](https://www.mongodb.com/)
+- [Express.js](https://expressjs.com/)
+- [React](https://react.dev/)
+- [Node.js](https://nodejs.org/)
+- [Google Gemini API](https://ai.google.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Puppeteer](https://pptr.dev/)
+- [Sharp](https://sharp.pixelplumbing.com/)
+- [Passport.js](http://www.passportjs.org/)
 
 ---
 
-> ⚠️ Never commit `.env` files, API keys, passwords, or database credentials to public repositories.
+## 📞 Support
+
+For support, email mukhrizbusiness@gmail.com or create an issue in this repository.
+
+---
+
+> ⚠️ **Security Notice:** Never commit `.env` files, API keys, passwords, or database credentials to public repositories. Always use environment variables and keep secrets secure.
+
+---
+
+## 🗺️ Roadmap
+
+- [x] User authentication (email/password)
+- [x] Google OAuth integration
+- [x] Voucher browsing and redemption
+- [x] PDF receipt generation
+- [x] Email notifications
+- [x] Admin dashboard
+- [x] AI-powered descriptions
+- [x] Points system
+- [x] Order history
+- [x] EC2 deployment automation
+- [ ] Payment gateway integration
+- [ ] Mobile app (React Native)
+- [ ] Multi-language support
+- [ ] Advanced analytics
+- [ ] Referral system
